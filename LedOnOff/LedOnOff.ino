@@ -1,24 +1,27 @@
 #include <WiFi.h>
 
-const char* ssid = "Cluj - G2 - Et.1 - Ap.17";       // Replace with your network SSID (name)
-const char* password = "romania-cluj";   // Replace with your network password
+const char* ssid = "Net co";       // Replace with your network SSID (name)
+const char* password = "C&V43V3R"; // Replace with your network password
 
 WiFiServer server(80);
 
+int flexSensorPin = 34; // Analog pin
+int flexSensorValue = 0; // Variable to store the sensor value
+
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   WiFi.begin(ssid, password);
-  
+
   while (WiFi.status() != WL_CONNECTED) {
     delay(1000);
     Serial.println("Connecting to WiFi...");
   }
-  
+
   Serial.println("Connected to WiFi");
   Serial.println(WiFi.localIP());
 
   server.begin();
-  
+
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 }
@@ -28,7 +31,7 @@ void loop() {
   if (client) {
     Serial.println("New Client.");
     String currentLine = "";
-    
+
     while (client.connected()) {
       if (client.available()) {
         char c = client.read();
@@ -41,7 +44,8 @@ void loop() {
 
             client.print("Click <a href=\"/LED=ON\">here</a> to turn the LED on<br>");
             client.print("Click <a href=\"/LED=OFF\">here</a> to turn the LED off<br>");
-            
+            client.print("Click <a href=\"/FLEX=READ\">here</a> to read the flex sensor value<br>");
+
             client.println();
             break;
           } else {
@@ -56,6 +60,15 @@ void loop() {
         }
         if (currentLine.endsWith("GET /LED=OFF")) {
           digitalWrite(LED_BUILTIN, LOW);
+        }
+        if (currentLine.endsWith("GET /FLEX=READ")) {
+          flexSensorValue = analogRead(flexSensorPin);
+          client.println("HTTP/1.1 200 OK"); // Send OK response
+          client.println("Content-Type: text/plain"); // Set content type
+          client.println(); // End of headers
+          client.println(flexSensorValue); // Send the flex sensor value
+          Serial.print("Flex Sensor Value: ");
+          Serial.println(flexSensorValue); // Print to Serial Monitor
         }
       }
     }
