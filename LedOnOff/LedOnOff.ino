@@ -67,6 +67,7 @@ void loop() {
           client.println("Content-Type: text/plain"); // Set content type
           client.println(); // End of headers
           client.println(flexSensorValue); // Send the flex sensor value
+          client.println(" 300");
           Serial.print("Flex Sensor Value: ");
           Serial.println(flexSensorValue); // Print to Serial Monitor
         }

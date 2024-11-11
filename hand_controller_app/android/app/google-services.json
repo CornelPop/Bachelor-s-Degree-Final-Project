@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "317448817455",
+    "project_id": "handcontroller-f59a1",
+    "storage_bucket": "handcontroller-f59a1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317448817455:android:853ea192c4cf7ea3c5afda",
+        "android_client_info": {
+          "package_name": "com.example.hand_controller_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwsL3XaErHPwhIazbpBPglAPVN4_jD5IM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
