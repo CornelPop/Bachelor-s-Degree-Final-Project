@@ -37,9 +37,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               ListTile(
                 title: const Text('Dashboard'),
-                onTap: () {
-                  Navigator.pop(context);
-                },
+                onTap: () {},
               ),
               ListTile(
                 title: const Text('Exercise Programs'),
@@ -57,6 +55,12 @@ class _MainScreenState extends State<MainScreen> {
                 title: const Text('Settings'),
                 onTap: () {},
               ),
+              ListTile(
+                title: const Text('Back'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              )
             ],
           ),
         ),

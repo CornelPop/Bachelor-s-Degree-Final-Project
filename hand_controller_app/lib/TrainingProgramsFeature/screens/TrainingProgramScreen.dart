@@ -103,9 +103,7 @@ class _TrainingProgramDashboardState extends State<TrainingProgramDashboard> {
 
   Future<void> fetchUserData(UserService userService) async {
     String? uid = await userService.getUserUid();
-    print("here");
-    print(uid);
-    print("here");
+
     if (uid != null) {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
       if (userData != null) {
@@ -170,7 +168,7 @@ class _TrainingProgramDashboardState extends State<TrainingProgramDashboard> {
                           ),
                           Text(
                             name,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 40,
                               fontWeight: FontWeight.bold,
                               color: Colors.black,
