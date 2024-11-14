@@ -1,69 +1,36 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
 import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
-
+import 'package:hand_controller_app/TrainingProgramsFeature/widgets/TrainingProgramDashboardDrawer.dart';
 import '../models/MockDataTrainingPrograms.dart';
 import '../models/TrainingProgram.dart';
 import '../widgets/ProgramContainerWidget.dart';
 
-class TrainingProgramScreen extends StatelessWidget {
+class TrainingProgramScreen extends StatefulWidget {
   const TrainingProgramScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              )
-          ),
-          centerTitle: true,
-          title: const Text('My amazing project'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, size: 30,),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.person, size: 30,),
-              onPressed: () {
-                print("salut profile");
-              },
-            ),
-          ],
-        ),
-        body: const TrainingProgramDashboard(),
-      ),
-    );
-  }
+  _TrainingProgramScreenState createState() => _TrainingProgramScreenState();
 }
 
-class TrainingProgramDashboard extends StatefulWidget {
-  const TrainingProgramDashboard({Key? key}) : super(key: key);
-
-  @override
-  _TrainingProgramDashboardState createState() => _TrainingProgramDashboardState();
-}
-
-class _TrainingProgramDashboardState extends State<TrainingProgramDashboard> {
+class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
 
   final UserService userService = UserService();
+  final AuthService authService = AuthService();
 
-  final String esp32IpAddress = "http://192.168.211.136";
+  String name = '';
+  String email = '';
+  String role = '';
+
   String flexSensorValue = '';
-  Timer? timer; // Declare a Timer variable
-  bool isTimerRunning = false; // Track the timer state
-  int progressPercentage = 0; // Track the progress percentage
+  Timer? timer;
+  bool isTimerRunning = false;
+  int progressPercentage = 0;
 
-  TrainingProgram? selectedProgram; // Currently selected training program
-  int currentExerciseIndex = 0; // Index of the current exercise
-  Map<String, int> currentFlexValues = {}; // Store current flex values
+  TrainingProgram? selectedProgram;
+  int currentExerciseIndex = 0;
+  Map<String, int> currentFlexValues = {};
 
   late double screenWidth;
   late double screenHeight;
@@ -71,22 +38,42 @@ class _TrainingProgramDashboardState extends State<TrainingProgramDashboard> {
   late double buttonHeight;
   late double containerHeight;
 
-  String name = '';
-  String email = '';
-  String role = '';
-
   int numberBeginnerExercises = 0;
   int numberIntermediateExercises = 0;
   int numberDifficultExercises = 0;
   int timeSpentInWorkouts = 0;
   int accuracyOfExercises = 0;
 
-  late Future<dynamic> _fetchUserDataFuture;
+  late Future<void> _fetchUserDataFuture;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserDataFuture = fetchUserData(userService);
+    _fetchUserDataFuture = fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    String? uid = await userService.getUserUid();
+    if (uid != null) {
+      Map<String, dynamic>? userData = await userService.getUserData(uid);
+      if (userData != null) {
+        setState(() {
+          name = userData['name'] as String;
+          email = userData['email'] as String;
+          role = userData['role'] as String;
+
+          numberBeginnerExercises = userData['numberBeginnerExercises'] as int;
+          numberIntermediateExercises = userData['numberIntermediateExercises'] as int;
+          numberDifficultExercises = userData['numberDifficultExercises'] as int;
+          timeSpentInWorkouts = userData['timeSpentInWorkouts'] as int;
+          accuracyOfExercises = userData['accuracyOfExercises'] as int;
+        });
+      } else {
+        print('No user data found.');
+      }
+    } else {
+      print('No UID found in SharedPreferences.');
+    }
   }
 
   @override
@@ -101,39 +88,43 @@ class _TrainingProgramDashboardState extends State<TrainingProgramDashboard> {
     containerHeight = screenHeight * 0.15;
   }
 
-  Future<void> fetchUserData(UserService userService) async {
-    String? uid = await userService.getUserUid();
-
-    if (uid != null) {
-      Map<String, dynamic>? userData = await userService.getUserData(uid);
-      if (userData != null) {
-        setState(() {
-          name = (userData['name'] as String?)!;
-          email = (userData['email'] as String?)!;
-          role = (userData['role'] as String?)!;
-
-          numberBeginnerExercises = (userData['numberBeginnerExercises'] as int?)!;
-          numberIntermediateExercises = (userData['numberIntermediateExercises'] as int?)!;
-          numberDifficultExercises = (userData['numberDifficultExercises'] as int?)!;
-          timeSpentInWorkouts = (userData['timeSpentInWorkouts'] as int?)!;
-          accuracyOfExercises = (userData['accuracyOfExercises'] as int?)!;
-        });
-
-      } else {
-        print('No user data found.');
-      }
-    } else {
-      print('No UID found in SharedPreferences.');
-    }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+
+    return Scaffold(
+        drawer: _buildDrawer(),
+        appBar: AppBar(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+          ),
+          centerTitle: true,
+          title: const Text('HandHero'),
+        ),
+        body: FutureBuilder(
+          future: _fetchUserDataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else {
+              return _buildContent();
+            }
+          },
+        ),
+      );
+  }
+
+  TrainingProgramDashboardDrawer _buildDrawer() {
+    return TrainingProgramDashboardDrawer(
+      name: name,
+      authService: authService,
+      userService: userService,
+    );
+  }
+
+  Widget _buildContent() {
     List<TrainingProgram> programs = getTrainingPrograms();
 
     return FutureBuilder(

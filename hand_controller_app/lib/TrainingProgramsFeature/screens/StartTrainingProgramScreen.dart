@@ -121,6 +121,7 @@ class _StartTrainingProgramScreenState extends State<StartTrainingProgramScreen>
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
+              Navigator.of(context).pop();
             },
             child: const Text("OK"),
           ),
