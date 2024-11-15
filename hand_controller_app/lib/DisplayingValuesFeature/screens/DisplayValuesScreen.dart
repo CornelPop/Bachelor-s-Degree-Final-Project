@@ -1,4 +1,5 @@
 import 'dart:async'; // Import the dart:async library to use Timer
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/screens/SignInScreen.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
@@ -60,6 +61,35 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
         });
       }
     }
+  }
+
+  Future<bool> _showExitDialog() async {
+    bool exitConfirmed = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        title: const Text("Exit app"),
+        content: const Text("Are you sure you want to exit?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              exit(0);
+            },
+            child: const Text("Yes"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: const Text("No"),
+          ),
+        ],
+      ),
+    );
+    return exitConfirmed;
   }
 
   void ledOn() async {
@@ -124,97 +154,102 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: Drawer(
-        width: 250,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            topRight: Radius.circular(20),
-            bottomRight: Radius.circular(20),
+    return WillPopScope(
+      onWillPop: () async {
+        return await _showExitDialog();
+      },
+      child: Scaffold(
+        drawer: Drawer(
+          width: 250,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
           ),
-        ),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(20),
-                  )
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.person_outline, size: 70,),
-                    Text(name, style: TextStyle(fontSize: 30),)
-                  ],
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: const BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20),
+                    )
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.person_outline, size: 70,),
+                      Text(name, style: TextStyle(fontSize: 30),)
+                    ],
+                  ),
                 ),
               ),
-            ),
-            ListTile(
-              title: const Text('Dashboard Programs'),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => TrainingProgramScreen(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('Dashboard Values'),
-              onTap: () {},
-            ),
-            ListTile(
-              title: const Text('Progress Tracking'),
-              onTap: () {},
-            ),
-            ListTile(
-              title: const Text('Profile'),
-              onTap: () {},
-            ),
-            ListTile(
-              title: const Text('Settings'),
-              onTap: () {},
-            ),
-            ListTile(
-              title: const Text('Sign out'),
-              onTap: () async {
-                await authService.signOut();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => const SignInScreen()),
-                      (Route<dynamic> route) => false,
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      appBar: AppBar(
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(20),
+              ListTile(
+                title: const Text('Dashboard Programs'),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => TrainingProgramScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                title: const Text('Dashboard Values'),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text('Progress Tracking'),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text('Profile'),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text('Settings'),
+                onTap: () {},
+              ),
+              ListTile(
+                title: const Text('Sign out'),
+                onTap: () async {
+                  await authService.signOut();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => const SignInScreen()),
+                        (Route<dynamic> route) => false,
+                  );
+                },
+              ),
+            ],
           ),
         ),
-        centerTitle: true,
-        title: const Text('HandHero'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            buildProgressBar('Thumb', currentFlexValues['Thumb']!),
-            buildProgressBar('Index', currentFlexValues['Index']!),
-            buildProgressBar('Middle', currentFlexValues['Middle']!),
-            buildProgressBar('Ring', currentFlexValues['Ring']!),
-            buildProgressBar('Pinky', currentFlexValues['Pinky']!),
-            if (flexSensorValue.isNotEmpty)
-              Text('Flex Sensor Value: $flexSensorValue'),
-          ],
+        appBar: AppBar(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(20),
+              bottomRight: Radius.circular(20),
+            ),
+          ),
+          centerTitle: true,
+          title: const Text('HandHero'),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              buildProgressBar('Thumb', currentFlexValues['Thumb']!),
+              buildProgressBar('Index', currentFlexValues['Index']!),
+              buildProgressBar('Middle', currentFlexValues['Middle']!),
+              buildProgressBar('Ring', currentFlexValues['Ring']!),
+              buildProgressBar('Pinky', currentFlexValues['Pinky']!),
+              if (flexSensorValue.isNotEmpty)
+                Text('Flex Sensor Value: $flexSensorValue'),
+            ],
+          ),
         ),
       ),
     );

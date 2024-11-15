@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/screens/RegisterScreen.dart';
+import 'package:hand_controller_app/AuthFeature/services/SharedPrefService.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/screens/TrainingProgramScreen.dart';
 
 import '../services/AuthService.dart';
@@ -16,6 +17,7 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
 
   final AuthService _authService = AuthService();
+  final SharedPrefsService sharedPrefsService = SharedPrefsService();
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -26,9 +28,16 @@ class _SignInScreenState extends State<SignInScreen> {
   bool isChecked = false;
 
   @override
+  void initState() {
+    super.initState();
+    _emailController.clear();
+    _passwordController.clear();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[50],
+      //backgroundColor: Colors.blue[50],
         appBar: AppBar(
           automaticallyImplyLeading: false,
           shape: const RoundedRectangleBorder(
@@ -42,7 +51,7 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(30, 16, 30, 16),
             child: Form(
               key: _formKey,
               child: Column(
@@ -67,10 +76,10 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   SizedBox(height: 70,),
                   Container(
-                    height: 60,
+                    height: 50,
                     decoration: BoxDecoration(
-                      color: Colors.blue[100], // Background color
-                      borderRadius: BorderRadius.circular(20), // Rounded corners
+                      color: Colors.blue[100],
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextFormField(
                       controller: _emailController,
@@ -92,10 +101,10 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   SizedBox(height: 10,),
                   Container(
-                    height: 60,
+                    height: 50,
                     decoration: BoxDecoration(
-                      color: Colors.blue[100], // Background color
-                      borderRadius: BorderRadius.circular(20), // Rounded corners
+                      color: Colors.blue[100],
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     child: TextFormField(
                       controller: _passwordController,
@@ -163,7 +172,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   //const SizedBox(height: 20),
                   Container(
-                    height: 60,
+                    height: 50,
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
@@ -179,12 +188,15 @@ class _SignInScreenState extends State<SignInScreen> {
                             context,
                             MaterialPageRoute(builder: (context) => TrainingProgramScreen()),
                           );
+
+                          print(isChecked);
+                          sharedPrefsService.storeRememberMe(isChecked);
                         }
                       },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.blue[500],
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(30),
                         ),
                         elevation: 0,
                       ),
@@ -200,23 +212,30 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   const SizedBox(height: 60),
                   Container(
-                    height: 60,
+                    height: 50,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Facebook sign in!'),
+                              ),
+                            );
+                          },
                           child: Container(
                             padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(30),
                               border: Border.all()
                             ),
                             child: Row(
                               children: [
                                 Image.asset("assets/facebook_logo.png",
                                   fit: BoxFit.cover,
-                                  width: 30,
-                                  height: 30,
+                                  width: 25,
+                                  height: 25,
                                 ),
                                 SizedBox(width: 10,),
                                 const Text(
@@ -231,18 +250,26 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                         SizedBox(width: 20,),
                         GestureDetector(
+                          onTap: () async {
+                            if ( await _authService.signInWithGoogle() != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => TrainingProgramScreen()),
+                              );
+                            };
+                          },
                           child: Container(
                             padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(30),
                                 border: Border.all()
                             ),
                             child: Row(
                               children: [
                                 Image.asset("assets/google_logo.png",
                                   fit: BoxFit.cover,
-                                  width: 30,
-                                  height: 30,
+                                  width: 25,
+                                  height: 25,
                                 ),
                                 SizedBox(width: 10,),
                                 const Text(

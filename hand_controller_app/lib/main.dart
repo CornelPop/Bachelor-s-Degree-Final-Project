@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/screens/SignInScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hand_controller_app/TrainingProgramsFeature/screens/TrainingProgramScreen.dart';
+import 'AuthFeature/services/SharedPrefService.dart';
 import 'firebase_options.dart';
 
 
@@ -16,15 +18,46 @@ Future<void> main() async{
 
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool isLoggedIn = false;
+  bool isLoading = true;
+  late SharedPrefsService _sharedPrefsService;
+
+  @override
+  void initState() {
+    super.initState();
+    _sharedPrefsService = SharedPrefsService();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    bool? rememberMe = await _sharedPrefsService.getRememberMe();
+    setState(() {
+      isLoggedIn = rememberMe ?? false;
+      isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'HandHero',
       debugShowCheckedModeBanner: false,
-      home: SignInScreen()
-      );
+      home: isLoading? const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      )
+          : isLoggedIn
+          ? const TrainingProgramScreen()
+          : const SignInScreen(),
+    );
   }
 }

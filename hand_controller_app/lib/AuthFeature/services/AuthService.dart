@@ -2,11 +2,13 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final UserService userService = UserService();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   Future<String?> register(String email, String password, String name, String role) async {
     try {
@@ -41,6 +43,47 @@ class AuthService {
     }
   }
 
+  Future<User?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return null;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      await userService.storeUserUid(userCredential.user!.uid);
+
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(user!.uid).get();
+      if (!userDoc.exists) {
+        await _firestore.collection('users').doc(user.uid).set({
+          'name': googleUser.displayName,
+          'createdAt': Timestamp.now(),
+          'role': 'Patient',
+          'email': googleUser.email,
+          'numberBeginnerExercises': 0,
+          'numberIntermediateExercises': 0,
+          'numberDifficultExercises': 0,
+          'timeSpentInWorkouts': 0,
+          'accuracyOfExercises': 0,
+        });
+      }
+
+      return user;
+    } catch (e) {
+      print(e);
+      return null;
+    }
+  }
+
+
   Future<String?> signIn(String email, String password) async {
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
@@ -60,6 +103,7 @@ class AuthService {
   Future<String?> signOut() async {
     try {
       await _auth.signOut();
+      await _googleSignIn.signOut();
       return 'User signed out';
     } catch (e) {
       return 'Error: ${e.toString()}';

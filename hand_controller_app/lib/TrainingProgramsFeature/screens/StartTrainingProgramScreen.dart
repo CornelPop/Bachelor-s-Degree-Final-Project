@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
+import 'package:hand_controller_app/TrainingProgramsFeature/screens/TrainingProgramScreen.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/widgets/CountdownTimerWidget.dart';
 
 import '../models/TrainingProgram.dart';
@@ -119,9 +120,14 @@ class _StartTrainingProgramScreenState extends State<StartTrainingProgramScreen>
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(context);
+              Navigator.of(context).pop(context);
+              Navigator.of(context).pop(context);
+              Navigator.of(context).pop(context);
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TrainingProgramScreen(),)
+              );
             },
             child: const Text("OK"),
           ),

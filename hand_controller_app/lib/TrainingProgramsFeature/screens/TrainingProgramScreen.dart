@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
 import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
@@ -80,40 +81,76 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    _fetchUserDataFuture = fetchUserData();
+
     var screenSize = MediaQuery.of(context).size;
     screenWidth = screenSize.width;
     screenHeight = screenSize.height;
     buttonWidth = screenWidth * 0.90;
     buttonHeight = screenHeight * 0.08;
     containerHeight = screenHeight * 0.15;
+
+  }
+
+  Future<bool> _showExitDialog() async {
+    bool exitConfirmed = await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+        title: const Text("Exit app"),
+        content: const Text("Are you sure you want to exit?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              exit(0);
+            },
+            child: const Text("Yes"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: const Text("No"),
+          ),
+        ],
+      ),
+    );
+    return exitConfirmed;
   }
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-        drawer: _buildDrawer(),
-        appBar: AppBar(
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
+    return WillPopScope(
+      onWillPop: () async {
+        return await _showExitDialog();
+      },
+      child: Scaffold(
+          drawer: _buildDrawer(),
+          appBar: AppBar(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
             ),
+            centerTitle: true,
+            title: const Text('HandHero'),
           ),
-          centerTitle: true,
-          title: const Text('HandHero'),
+          body: FutureBuilder(
+            future: _fetchUserDataFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else {
+                return _buildContent();
+              }
+            },
+          ),
         ),
-        body: FutureBuilder(
-          future: _fetchUserDataFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else {
-              return _buildContent();
-            }
-          },
-        ),
-      );
+    );
   }
 
   TrainingProgramDashboardDrawer _buildDrawer() {
