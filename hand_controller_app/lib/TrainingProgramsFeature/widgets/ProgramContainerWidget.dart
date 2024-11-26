@@ -20,17 +20,20 @@ class ProgramContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     Color iconColor;
     List<double> opacities;
+    Color bgColor;
 
     if (difficulty == 'Beginner') {
       iconColor = const Color.fromARGB(255, 0, 158, 0);
       opacities = [1.0, 0.3, 0.3];
+      bgColor = Colors.green.shade100;
     } else if (difficulty == 'Intermediate') {
       iconColor = const Color.fromARGB(255, 255, 140, 0);
       opacities = [1.0, 1.0, 0.3];
+      bgColor = Colors.yellow.shade100;
     } else {
-      // Difficult
       iconColor = const Color.fromARGB(255, 200, 0, 0);
       opacities = [1.0, 1.0, 1.0];
+      bgColor = Colors.red.shade100;
     }
 
     return GestureDetector(
@@ -46,7 +49,7 @@ class ProgramContainer extends StatelessWidget {
         height: MediaQuery.of(context).size.height * 0.15,
         width: MediaQuery.of(context).size.width * 0.7,
         decoration: BoxDecoration(
-          color: iconColor.withOpacity(0.2),
+          color: bgColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

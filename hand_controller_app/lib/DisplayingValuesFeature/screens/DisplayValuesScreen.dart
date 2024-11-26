@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/screens/SignInScreen.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
+import 'package:hand_controller_app/SettingsFeature/widgets/ExitDialogWidget.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/screens/TrainingProgramScreen.dart';
 import 'package:http/http.dart' as http;
 
 import '../../AuthFeature/services/UserService.dart';
+import '../../SettingsFeature/screens/SettingsScreen.dart';
 
 class DisplayValuesScreen extends StatefulWidget {
   const DisplayValuesScreen({Key? key}) : super(key: key);
@@ -61,35 +63,6 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
         });
       }
     }
-  }
-
-  Future<bool> _showExitDialog() async {
-    bool exitConfirmed = await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-        title: const Text("Exit app"),
-        content: const Text("Are you sure you want to exit?"),
-        actions: [
-          TextButton(
-            onPressed: () {
-              exit(0);
-            },
-            child: const Text("Yes"),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: const Text("No"),
-          ),
-        ],
-      ),
-    );
-    return exitConfirmed;
   }
 
   void ledOn() async {
@@ -156,7 +129,7 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        return await _showExitDialog();
+        return await ExitDialog.showExitDialog(context);
       },
       child: Scaffold(
         drawer: Drawer(
@@ -211,7 +184,13 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
               ),
               ListTile(
                 title: const Text('Settings'),
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => SettingsScreen(),
+                    ),
+                  );
+                },
               ),
               ListTile(
                 title: const Text('Sign out'),

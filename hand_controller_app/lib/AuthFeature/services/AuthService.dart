@@ -128,4 +128,33 @@ class AuthService {
       return 'Error: ${e.toString()}';
     }
   }
+
+  Future<String?> deleteAccount() async {
+    User? user = _auth.currentUser;
+
+    if (user != null) {
+      try {
+        await _firestore.collection('users').doc(user.uid).delete();
+
+        await user.delete();
+
+        await _auth.signOut();
+
+        return 'User deleted';
+      } catch (e) {
+        return 'Error: ${e.toString()}';
+      }
+    }
+  }
+
+  Future<String?> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+      return 'password email sent';
+
+    } catch (e) {
+      return 'Error: ${e.toString()}';
+    }
+  }
+
 }

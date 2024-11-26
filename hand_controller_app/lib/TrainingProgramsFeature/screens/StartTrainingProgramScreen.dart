@@ -120,13 +120,9 @@ class _StartTrainingProgramScreenState extends State<StartTrainingProgramScreen>
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(context);
-              Navigator.of(context).pop(context);
-              Navigator.of(context).pop(context);
-              Navigator.of(context).pop(context);
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TrainingProgramScreen(),)
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (context) => TrainingProgramScreen()),
+                    (Route<dynamic> route) => false,
               );
             },
             child: const Text("OK"),
