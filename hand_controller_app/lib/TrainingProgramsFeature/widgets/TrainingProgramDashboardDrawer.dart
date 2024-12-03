@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
+import 'package:hand_controller_app/ProfileFeature/screens/ProfileScreen.dart';
+import 'package:hand_controller_app/ProgressTrackingFeature/screens/ProgressTrackingScreen.dart';
 import 'package:hand_controller_app/SettingsFeature/screens/SettingsScreen.dart';
 
 import '../../AuthFeature/screens/SignInScreen.dart';
@@ -9,6 +11,7 @@ import '../../GlobalThemeData.dart';
 
 class TrainingProgramDashboardDrawer extends StatelessWidget {
   final String name;
+  final String email;
   final AuthService authService;
   final UserService userService;
 
@@ -17,12 +20,27 @@ class TrainingProgramDashboardDrawer extends StatelessWidget {
     required this.name,
     required this.authService,
     required this.userService,
+    required this.email,
   }) : super(key: key);
+
+  Widget buildListTilesTitle(Icon icon, String text) {
+    return Row(
+      children: [
+        icon,
+        SizedBox(width: 8), // Add some spacing between the icon and the text
+        Text(
+          text,
+          style: TextStyle(color: Colors.white), // Apply your desired text style
+        ),
+      ],
+    );
+  }
+
 
   @override
   Drawer build(BuildContext context) {
     return Drawer(
-      width: 250,
+      width: 275,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           topRight: Radius.circular(20),
@@ -36,34 +54,55 @@ class TrainingProgramDashboardDrawer extends StatelessWidget {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20)
+          )
         ),
         child: ListView(
-          padding: EdgeInsets.zero,
+          physics: NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.all(5),
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                color: Colors.transparent, // Keep transparent to show gradient
+                color: Colors.transparent,
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(20),
                 ),
               ),
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Icon(Icons.person_outline, size: 70, color: Colors.white),
-                    Text(name, style: const TextStyle(fontSize: 30, color: Colors.white)),
+                    const Icon(Icons.person_outline, size: 50, color: Colors.white),
+                    SizedBox(width: 10,),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(name, style: const TextStyle(fontSize: 20, color: Colors.white)),
+                        SizedBox(height: 10,),
+                        Text(email, style:  TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.5))),
+                      ],
+                    ),
                   ],
                 ),
               ),
             ),
             const Divider(color: Colors.white), // Separation line
-            ListTile(
-              title: const Text('Dashboard Programs', style: TextStyle(color: Colors.white)),
-              onTap: () {},
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: ListTile(
+                title: buildListTilesTitle(Icon(Icons.dashboard, color: Colors.white), 'Dashboard Programs'),
+                onTap: () {},
+              ),
             ),
             ListTile(
-              title: const Text('Dashboard Values', style: TextStyle(color: Colors.white)),
+              title: buildListTilesTitle(Icon(Icons.assessment, color: Colors.white), 'Dashboard Values'),
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -73,15 +112,25 @@ class TrainingProgramDashboardDrawer extends StatelessWidget {
               },
             ),
             ListTile(
-              title: const Text('Progress Tracking', style: TextStyle(color: Colors.white)),
-              onTap: () {},
+              title: buildListTilesTitle(Icon(Icons.track_changes, color: Colors.white), 'Progress Tracking'),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => ProgressTrackingScreen()),
+                      (Route<dynamic> route) => false,
+                );
+              },
             ),
             ListTile(
-              title: const Text('Profile', style: TextStyle(color: Colors.white)),
-              onTap: () {},
+              title: buildListTilesTitle(Icon(Icons.person, color: Colors.white), 'Profile'),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => ProfileScreen()),
+                      (Route<dynamic> route) => false,
+                );
+              },
             ),
             ListTile(
-              title: const Text('Settings', style: TextStyle(color: Colors.white)),
+              title: buildListTilesTitle(Icon(Icons.settings, color: Colors.white), 'Settings'),
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -91,7 +140,7 @@ class TrainingProgramDashboardDrawer extends StatelessWidget {
               },
             ),
             ListTile(
-              title: const Text('Sign out', style: TextStyle(color: Colors.white)),
+              title: buildListTilesTitle(Icon(Icons.exit_to_app, color: Colors.white), 'Sign out'),
               onTap: () async {
                 await authService.signOut();
                 Navigator.of(context).pushAndRemoveUntil(

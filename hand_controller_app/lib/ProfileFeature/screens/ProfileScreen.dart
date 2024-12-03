@@ -1,35 +1,21 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
-import 'package:hand_controller_app/DisplayingValuesFeature/widgets/DisplayValuesDashboardDrawer.dart';
-import 'package:http/http.dart' as http;
-import '../../AlertDialogs/ExitDialogWidget.dart';
+import 'package:hand_controller_app/AuthFeature/services/SharedPrefService.dart';
+import 'package:hand_controller_app/ProfileFeature/widgets/ProfileDashboardDrawer.dart';
+import '../../AuthFeature/services/AuthService.dart';
 import '../../AuthFeature/services/UserService.dart';
+import '../../AlertDialogs/ExitDialogWidget.dart';
 import '../../GlobalThemeData.dart';
 
-class DisplayValuesScreen extends StatefulWidget {
-  const DisplayValuesScreen({super.key});
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
 
   @override
-  _DisplayValuesScreenState createState() => _DisplayValuesScreenState();
+  _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
+class _ProfileScreenState extends State<ProfileScreen> {
   final UserService userService = UserService();
   final AuthService authService = AuthService();
-
-  final String esp32IpAddress = "http://192.168.80.136";
-  Map<String, int> currentFlexValues = {
-    'Thumb': 0,
-    'Index': 0,
-    'Middle': 0,
-    'Ring': 0,
-    'Pinky': 0,
-  };
-  Timer? timer;
-  bool isTimerRunning = false;
-  String flexSensorValue = '';
-  bool isRequestInProgress = false;
 
   String name = '';
   String email = '';
@@ -41,13 +27,6 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
   void initState() {
     super.initState();
     _fetchUserDataFuture = fetchUserData();
-    startTimer();
-  }
-
-  @override
-  void dispose() {
-    stopTimer();
-    super.dispose();
   }
 
   Future<void> fetchUserData() async {
@@ -64,47 +43,8 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
         print('No user data found.');
       }
     } else {
-      print('No UID found.');
+      print('No UID found in SharedPreferences.');
     }
-  }
-
-  void ledOn() async {
-    var url = Uri.parse('$esp32IpAddress/LED=ON');
-    await http.get(url);
-  }
-
-  void ledOff() async {
-    var url = Uri.parse('$esp32IpAddress/LED=OFF');
-    await http.get(url);
-  }
-
-  void startTimer() {
-    if (!isTimerRunning) {
-      isTimerRunning = true;
-      timer = Timer.periodic(const Duration(milliseconds: 200), (Timer t) {
-        readFlexSensor();
-      });
-    }
-  }
-
-  void stopTimer() {
-    if (isTimerRunning) {
-      timer?.cancel();
-      isTimerRunning = false;
-    }
-  }
-
-  void readFlexSensor() async {
-    // Simulated sensor values; replace this with actual HTTP request
-    setState(() {
-      currentFlexValues = {
-        'Thumb': (currentFlexValues['Thumb']! + 10) % 100,
-        'Index': (currentFlexValues['Index']! + 15) % 100,
-        'Middle': (currentFlexValues['Middle']! + 20) % 100,
-        'Ring': (currentFlexValues['Ring']! + 25) % 100,
-        'Pinky': (currentFlexValues['Pinky']! + 30) % 100,
-      };
-    });
   }
 
   @override
@@ -157,7 +97,7 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
                             child: const Center(
                                 child: CircularProgressIndicator()));
                       } else {
-                        return displayValuesContentWidget();
+                        return profileContentWidget();
                       }
                     },
                   ),
@@ -170,8 +110,8 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
     );
   }
 
-  DisplayValuesDashboardDrawer _buildDrawer() {
-    return DisplayValuesDashboardDrawer(
+  ProfileDashboardDrawer _buildDrawer() {
+    return ProfileDashboardDrawer(
       name: name,
       email: email,
       authService: authService,
@@ -179,7 +119,7 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
     );
   }
 
-  Widget displayValuesContentWidget() {
+  Widget profileContentWidget() {
     return Container(
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
@@ -192,46 +132,36 @@ class _DisplayValuesScreenState extends State<DisplayValuesScreen> {
       ),
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              buildProgressBar('Thumb', currentFlexValues['Thumb']!),
-              buildProgressBar('Index', currentFlexValues['Index']!),
-              buildProgressBar('Middle', currentFlexValues['Middle']!),
-              buildProgressBar('Ring', currentFlexValues['Ring']!),
-              buildProgressBar('Pinky', currentFlexValues['Pinky']!),
-              if (flexSensorValue.isNotEmpty)
-                Text('Flex Sensor Value: $flexSensorValue',
-                    style: const TextStyle(color: Colors.white)),
-            ],
-          ),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.white,
+              child: Icon(Icons.person, size: 50, color: CustomTheme.mainColor),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              name,
+              style: const TextStyle(fontSize: 24, color: Colors.white),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              email,
+              style: const TextStyle(fontSize: 16, color: Colors.white70),
+            ),
+            const SizedBox(height: 5),
+            Text(
+              role,
+              style: const TextStyle(fontSize: 16, color: Colors.white70),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Profile Page content goes here',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget buildProgressBar(String label, int value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('$label: $value', style: const TextStyle(color: Colors.white)),
-          TweenAnimationBuilder(
-            tween: Tween<double>(begin: 0, end: value / 100),
-            duration: const Duration(milliseconds: 300),
-            builder: (context, double progress, _) {
-              return LinearProgressIndicator(
-                value: progress,
-                minHeight: 30,
-                backgroundColor: Colors.grey.shade300,
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-              );
-            },
-          ),
-        ],
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'Exercise.dart';
 import 'TrainingProgram.dart';
 
 List<TrainingProgram> getTrainingPrograms() {
+
   Exercise exercise1 = Exercise(
     name: 'Fingers Flex',
     description: '',
@@ -13,27 +14,32 @@ List<TrainingProgram> getTrainingPrograms() {
     name: 'Fingers Relax',
     description: '',
     numberOfTimes: 10,
-    targetValues: {'Thumb': 200, 'Index': 200, 'Middle': 200, 'Ring': 200, 'Pinky': 200}
+    targetValues: {'Thumb': 200, 'Index': 200, 'Middle': 200, 'Ring': 200, 'Pinky': 200},
   );
+
+  DateTime now = DateTime.now();
 
   TrainingProgram program1 = TrainingProgram(
     name: 'Beginner Program',
-    category: 'Beginner',
     duration: 10,
-    exercises: [exercise1],
+    exercises: [exercise1, exercise1, exercise1, exercise1],
+    category: 'Beginner',
+    date: now,
   );
 
   TrainingProgram program2 = TrainingProgram(
     name: 'Beginner Program',
     category: 'Beginner',
     duration: 10,
-    exercises: [exercise1],
+    date: now,
+    exercises: [exercise1, exercise1, exercise1, exercise1],
   );
 
   TrainingProgram program3 = TrainingProgram(
     name: 'Intermediate Program',
     category: 'Intermediate',
     duration: 15,
+    date: now,
     exercises: [exercise1, exercise2, exercise1, exercise2],
   );
 
@@ -41,6 +47,7 @@ List<TrainingProgram> getTrainingPrograms() {
     name: 'Intermediate Program',
     category: 'Intermediate',
     duration: 15,
+    date: now,
     exercises: [exercise1, exercise2, exercise1, exercise2],
   );
 
@@ -48,6 +55,7 @@ List<TrainingProgram> getTrainingPrograms() {
     name: 'Difficult Program',
     category: 'Difficult',
     duration: 20,
+    date: now,
     exercises: [exercise1, exercise2, exercise1, exercise2, exercise1, exercise2],
   );
 
@@ -55,6 +63,7 @@ List<TrainingProgram> getTrainingPrograms() {
     name: 'Difficult Program',
     category: 'Difficult',
     duration: 20,
+    date: now,
     exercises: [exercise1, exercise2, exercise1, exercise2, exercise1, exercise2],
   );
 

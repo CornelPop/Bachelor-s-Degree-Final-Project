@@ -4,8 +4,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
 import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
-import 'package:hand_controller_app/SettingsFeature/widgets/ExitDialogWidget.dart';
+import 'package:hand_controller_app/ProgressTrackingFeature/screens/ProgressTrackingScreen.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/widgets/TrainingProgramDashboardDrawer.dart';
+import '../../AlertDialogs/ExitDialogWidget.dart';
 import '../../GlobalThemeData.dart';
 import '../models/MockDataTrainingPrograms.dart';
 import '../models/TrainingProgram.dart';
@@ -131,7 +132,18 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                     future: _fetchUserDataFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return Container(
+                            height: MediaQuery.of(context).size.height,
+                            width: MediaQuery.of(context).size.width,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                            ),
+                            child: const Center(
+                                child: CircularProgressIndicator()));
                       } else {
                         return _buildContent();
                       }
@@ -146,10 +158,10 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
     );
   }
 
-
   TrainingProgramDashboardDrawer _buildDrawer() {
     return TrainingProgramDashboardDrawer(
       name: name,
+      email: email,
       authService: authService,
       userService: userService,
     );
@@ -185,19 +197,15 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                         opacity: 0.7,
                         child: Text(
                           "Hello,",
-                          style: TextStyle(
-                            fontSize: 40,
-                            color: Colors.white
-                          ),
+                          style: TextStyle(fontSize: 40, color: Colors.white),
                         ),
                       ),
                       Text(
                         name,
                         style: const TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                            color: Colors.white
-                        ),
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
                       ),
                     ],
                   ),
@@ -211,10 +219,9 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                   child: const Text(
                     'Your stats',
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                        color: Colors.white
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
               ),
@@ -233,55 +240,79 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                         child: Column(
                           children: [
                             Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.only(
-                                    bottom: 8.0, right: 8.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade100,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.insert_chart,
-                                          color: Colors.red, size: 40),
-                                      Text(
-                                        '$accuracyOfExercises',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const ProgressTrackingScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(
+                                      bottom: 8.0, right: 8.0),
+                                  decoration: BoxDecoration(
+                                    color: CustomTheme.accentColor4,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.insert_chart,
+                                            color: Colors.white, size: 40),
+                                        Text(
+                                          '$accuracyOfExercises',
+                                          style: TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
                                         ),
-                                      ),
-                                      Text('Accuracy'),
-                                    ],
+                                        Text(
+                                          'Accuracy',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                             Expanded(
-                              child: Container(
-                                margin:
-                                    const EdgeInsets.only(right: 8.0, top: 8.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade100,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.timer,
-                                          color: Colors.red, size: 40),
-                                      Text(
-                                        '$timeSpentInWorkouts',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const ProgressTrackingScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.only(right: 8.0, top: 8.0),
+                                  decoration: BoxDecoration(
+                                    color: CustomTheme.accentColor4,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.timer,
+                                            color: Colors.white, size: 40),
+                                        Text(
+                                          '$timeSpentInWorkouts',
+                                          style: const TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
                                         ),
-                                      ),
-                                      Text('Time Spent'),
-                                    ],
+                                        Text(
+                                          'Time Spent',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -294,146 +325,176 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                         child: Column(
                           children: [
                             Expanded(
-                              child: Container(
-                                margin:
-                                    const EdgeInsets.only(bottom: 8.0, left: 8.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade100,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.bolt,
-                                          color: Color.fromARGB(255, 0, 158, 0),
-                                          size: 30),
-                                      const Opacity(
-                                        opacity: 0.3,
-                                        child: Icon(Icons.bolt,
-                                            color: Color.fromARGB(255, 0, 158, 0),
-                                            size: 30),
-                                      ),
-                                      const Opacity(
-                                        opacity: 0.3,
-                                        child: Icon(Icons.bolt,
-                                            color: Color.fromARGB(255, 0, 158, 0),
-                                            size: 30),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 8.0),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              '$numberBeginnerExercises',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text('Exercises'),
-                                          ],
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const ProgressTrackingScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(
+                                      bottom: 8.0, left: 8.0),
+                                  decoration: BoxDecoration(
+                                    color: CustomTheme.accentColor,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.bolt,
+                                            color: Colors.blue[900], size: 30),
+                                        Opacity(
+                                          opacity: 0.3,
+                                          child: Icon(Icons.bolt,
+                                              color: Colors.blue[900], size: 30),
                                         ),
-                                      ),
-                                    ],
+                                        Opacity(
+                                          opacity: 0.3,
+                                          child: Icon(Icons.bolt,
+                                              color: Colors.blue[900], size: 30),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                '$numberBeginnerExercises',
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white),
+                                              ),
+                                              Text(
+                                                'Exercises',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                             Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.only(
-                                    bottom: 4.0, left: 8.0, top: 4.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.yellow.shade100,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.bolt,
-                                          color: Color.fromARGB(255, 255, 140, 0),
-                                          size: 30),
-                                      const Icon(Icons.bolt,
-                                          color: Color.fromARGB(255, 255, 140, 0),
-                                          size: 30),
-                                      const Opacity(
-                                        opacity: 0.3,
-                                        child: Icon(Icons.bolt,
-                                            color:
-                                                Color.fromARGB(255, 255, 140, 0),
-                                            size: 30),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 8.0),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              '$numberIntermediateExercises',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Text('Exercises'),
-                                          ],
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const ProgressTrackingScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  margin: const EdgeInsets.only(
+                                      bottom: 4.0, left: 8.0, top: 4.0),
+                                  decoration: BoxDecoration(
+                                    color: CustomTheme.accentColor2,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.bolt,
+                                            color: Colors.blue[900], size: 30),
+                                        Icon(Icons.bolt,
+                                            color: Colors.blue[900], size: 30),
+                                        Opacity(
+                                          opacity: 0.3,
+                                          child: Icon(Icons.bolt,
+                                              color: Colors.blue[900], size: 30),
                                         ),
-                                      ),
-                                    ],
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                '$numberIntermediateExercises',
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white),
+                                              ),
+                                              Text('Exercises',
+                                                  style: TextStyle(
+                                                      color: Colors.white)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                             Expanded(
-                              child: Container(
-                                margin:
-                                    const EdgeInsets.only(left: 8.0, top: 8.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.shade100,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(Icons.bolt,
-                                          color: Color.fromARGB(255, 200, 0, 0),
-                                          size: 30),
-                                      const Icon(Icons.bolt,
-                                          color: Color.fromARGB(255, 200, 0, 0),
-                                          size: 30),
-                                      const Icon(Icons.bolt,
-                                          color: Color.fromARGB(255, 200, 0, 0),
-                                          size: 30),
-                                      Padding(
-                                        padding: const EdgeInsets.only(left: 8.0),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              '$numberDifficultExercises',
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => const ProgressTrackingScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  margin:
+                                      const EdgeInsets.only(left: 8.0, top: 8.0),
+                                  decoration: BoxDecoration(
+                                    color: CustomTheme.accentColor3,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(Icons.bolt,
+                                            color: Colors.blue[900], size: 30),
+                                        Icon(Icons.bolt,
+                                            color: Colors.blue[900], size: 30),
+                                        Icon(Icons.bolt,
+                                            color: Colors.blue[900], size: 30),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                '$numberDifficultExercises',
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white),
                                               ),
-                                            ),
-                                            Text('Exercises'),
-                                          ],
+                                              Text(
+                                                'Exercises',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -453,10 +514,9 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                   child: const Text(
                     'Beginner',
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                        color: Colors.white
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
               ),
@@ -465,6 +525,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                 alignment: Alignment.centerLeft,
                 height: screenHeight * 0.17,
                 child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   itemCount: programs.length,
                   itemBuilder: (context, index) {
@@ -494,10 +555,9 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                   child: const Text(
                     'Intermediate',
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                        color: Colors.white
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
               ),
@@ -505,6 +565,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
               Container(
                 height: screenHeight * 0.17,
                 child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   itemCount: programs.length,
                   itemBuilder: (context, index) {
@@ -534,10 +595,9 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                   child: const Text(
                     'Difficult',
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                        color: Colors.white
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
                   ),
                 ),
               ),
@@ -545,6 +605,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
               Container(
                 height: screenHeight * 0.17,
                 child: ListView.builder(
+                  physics: BouncingScrollPhysics(),
                   scrollDirection: Axis.horizontal,
                   itemCount: programs.length,
                   itemBuilder: (context, index) {

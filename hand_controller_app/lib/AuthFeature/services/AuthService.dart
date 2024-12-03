@@ -35,7 +35,6 @@ class AuthService {
         password: password,
       );
 
-      // Encryption
       final key = encrypt.Key.fromLength(32);
       final iv = encrypt.IV.fromLength(16);
       final encrypted = encrypt.Encrypter(encrypt.AES(key));
@@ -134,10 +133,16 @@ class AuthService {
 
     if (user != null) {
       try {
-        await _firestore.collection('users').doc(user.uid).delete();
+        DocumentReference userDocRef = _firestore.collection('users').doc(user.uid);
+        CollectionReference completedProgramsRef = userDocRef.collection('completedPrograms');
+        QuerySnapshot completedProgramsSnapshot = await completedProgramsRef.get();
 
+        for (DocumentSnapshot doc in completedProgramsSnapshot.docs) {
+          await doc.reference.delete();
+        }
+
+        await userDocRef.delete();
         await user.delete();
-
         await _auth.signOut();
 
         return 'User deleted';
@@ -145,7 +150,9 @@ class AuthService {
         return 'Error: ${e.toString()}';
       }
     }
+    return 'No user signed in';
   }
+
 
   Future<String?> sendPasswordResetEmail(String email) async {
     try {

@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hand_controller_app/AuthFeature/models/User.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../TrainingProgramsFeature/models/TrainingProgram.dart';
+
 class UserService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -37,4 +39,40 @@ class UserService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('uid');
   }
+
+  Future<void> addCompletedProgram(String userId, TrainingProgram program) async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    program.updateDate(DateTime.now());
+
+    try {
+      await firestore
+          .collection('users')
+          .doc(userId)
+          .collection('completedPrograms')
+          .add(program.toMap());
+    } catch (e) {
+      print("Error adding completed program: $e");
+    }
+  }
+
+  Future<List<TrainingProgram>> getCompletedPrograms(String userId) async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    try {
+      QuerySnapshot querySnapshot = await firestore
+          .collection('users')
+          .doc(userId)
+          .collection('completedPrograms')
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => TrainingProgram.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print("Error getting completed programs: $e");
+      return [];
+    }
+  }
+
 }

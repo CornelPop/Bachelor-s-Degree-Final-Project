@@ -17,8 +17,12 @@ Future<void> main() async{
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
 
-  runApp(const MyApp());
-
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((_) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatefulWidget {

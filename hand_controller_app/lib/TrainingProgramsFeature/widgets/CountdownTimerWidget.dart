@@ -24,7 +24,7 @@ class CountdownTimer extends StatelessWidget {
               return CircularProgressIndicator(
                 value: animation.value,
                 strokeWidth: 8,
-                backgroundColor: Colors.grey[300],
+                backgroundColor: Colors.white,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
               );
             },
@@ -32,7 +32,7 @@ class CountdownTimer extends StatelessWidget {
         ),
         Text(
           '$currentTime',
-          style: TextStyle(fontSize: 48),
+          style: TextStyle(fontSize: 48, color: Colors.white),
         ),
       ],
     );

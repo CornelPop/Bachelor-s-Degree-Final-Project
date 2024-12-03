@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
-import 'package:hand_controller_app/AuthFeature/widgets/ErrorDialogWidget.dart';
+import 'package:hand_controller_app/AlertDialogs/ErrorDialogWidget.dart';
 
 import '../../GlobalThemeData.dart';
 import 'SignInScreen.dart';
@@ -13,12 +13,12 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-
   final AuthService _authService = AuthService();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   String? _message;
   String? _role;
@@ -39,398 +39,454 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
         child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  height: 220,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(
-                      color: Colors.transparent, // Make border color transparent to show the gradient
+          physics: BouncingScrollPhysics(),
+          child: Column(
+            children: [
+              Container(
+                height: 220,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: Colors
+                        .transparent, // Make border color transparent to show the gradient
+                  ),
+                ),
+                child: Image.asset(
+                  "images/logo.png",
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(30, 16, 30, 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Create an account',
+                      style: TextStyle(
+                        fontSize: 35,
+                        fontWeight: FontWeight.bold,
+                        color: CustomTheme.secondaryColor,
+                      ),
                     ),
-                  ),
-                  child: Image.asset(
-                    "images/logo.png",
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(30, 16, 30, 16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'Create an account',
-                        style: TextStyle(
-                          fontSize: 35,
-                          fontWeight: FontWeight.bold,
-                          color: CustomTheme.secondaryColor,
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),  // Shadow color
-                              blurRadius: 20,  // Blur radius
-                              offset: Offset(0, 0),  // Offset of the shadow
-                            ),
+                    SizedBox(height: 20),
+                    Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            CustomTheme.accentColor4,
+                            CustomTheme.accentColor2
                           ],
-                          borderRadius: BorderRadius.circular(30),
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                        child: TextFormField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Name',
-                            prefixIcon: Icon(Icons.person, color: Colors.white),
-                            labelStyle: TextStyle(color: Colors.white),
-                            border: InputBorder.none,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            // Shadow color
+                            blurRadius: 20,
+                            // Blur radius
+                            offset: Offset(0, 0), // Offset of the shadow
                           ),
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        ],
+                        borderRadius: BorderRadius.circular(30),
                       ),
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),  // Shadow color
-                              blurRadius: 20,  // Blur radius
-                              offset: Offset(0, 0),  // Offset of the shadow
-                            ),
+                      child: TextFormField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Name',
+                          prefixIcon: Icon(Icons.person, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
+                          border: InputBorder.none,
+                        ),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            CustomTheme.accentColor4,
+                            CustomTheme.accentColor2
                           ],
-                          borderRadius: BorderRadius.circular(30),
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                        child: TextFormField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.mail, color: Colors.white),
-                            labelStyle: TextStyle(color: Colors.white),
-                            border: InputBorder.none,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            // Shadow color
+                            blurRadius: 20,
+                            // Blur radius
+                            offset: Offset(0, 0), // Offset of the shadow
                           ),
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        ],
+                        borderRadius: BorderRadius.circular(30),
                       ),
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),  // Shadow color
-                              blurRadius: 20,  // Blur radius
-                              offset: Offset(0, 0),  // Offset of the shadow
-                            ),
+                      child: TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.mail, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
+                          border: InputBorder.none,
+                        ),
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            CustomTheme.accentColor4,
+                            CustomTheme.accentColor2
                           ],
-                          borderRadius: BorderRadius.circular(30),
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                        child: TextFormField(
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            prefixIcon: Icon(Icons.lock, color: Colors.white),
-                            labelStyle: TextStyle(color: Colors.white),
-                            suffixIcon: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  showPass = !showPass;
-                                });
-                              },
-                              child: showPass
-                                  ? Icon(Icons.disabled_visible_rounded, color: Colors.white)
-                                  : Icon(Icons.remove_red_eye_rounded, color: Colors.white),
-                            ),
-                            border: InputBorder.none,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            // Shadow color
+                            blurRadius: 20,
+                            // Blur radius
+                            offset: Offset(0, 0), // Offset of the shadow
                           ),
-                          obscureText: !showPass,
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        ],
+                        borderRadius: BorderRadius.circular(30),
                       ),
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
+                      child: TextFormField(
+                        controller: _passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          prefixIcon: Icon(Icons.lock, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                showPass = !showPass;
+                              });
+                            },
+                            child: showPass
+                                ? Icon(Icons.disabled_visible_rounded,
+                                    color: Colors.white)
+                                : Icon(Icons.remove_red_eye_rounded,
+                                    color: Colors.white),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),  // Shadow color
-                              blurRadius: 20,  // Blur radius
-                              offset: Offset(0, 0),  // Offset of the shadow
-                            ),
+                          border: InputBorder.none,
+                        ),
+                        obscureText: !showPass,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            CustomTheme.accentColor4,
+                            CustomTheme.accentColor2
                           ],
-                          borderRadius: BorderRadius.circular(30),
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                        child: TextFormField(
-                          controller: _confirmPasswordController,
-                          decoration: InputDecoration(
-                            labelText: 'Confirm Password',
-                            prefixIcon: Icon(Icons.lock, color: Colors.white),
-                            labelStyle: TextStyle(color: Colors.white),
-                            suffixIcon: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  showConfirmPass = !showConfirmPass;
-                                });
-                              },
-                              child: showConfirmPass
-                                  ? Icon(Icons.disabled_visible_rounded, color: Colors.white)
-                                  : Icon(Icons.remove_red_eye_rounded, color: Colors.white),
-                            ),
-                            border: InputBorder.none,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            // Shadow color
+                            blurRadius: 20,
+                            // Blur radius
+                            offset: Offset(0, 0), // Offset of the shadow
                           ),
-                          obscureText: !showConfirmPass,
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        ],
+                        borderRadius: BorderRadius.circular(30),
                       ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        "Choose you title from the options below:",
-                        style: TextStyle(
-                            color: Colors.white
-                        ),
-                      ),
-                      const SizedBox(height: 10,),
-                      Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
+                      child: TextFormField(
+                        controller: _confirmPasswordController,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          prefixIcon: Icon(Icons.lock, color: Colors.white),
+                          labelStyle: TextStyle(color: Colors.white),
+                          suffixIcon: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                showConfirmPass = !showConfirmPass;
+                              });
+                            },
+                            child: showConfirmPass
+                                ? Icon(Icons.disabled_visible_rounded,
+                                    color: Colors.white)
+                                : Icon(Icons.remove_red_eye_rounded,
+                                    color: Colors.white),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),  // Shadow color
-                              blurRadius: 20,  // Blur radius
-                              offset: Offset(0, 0),  // Offset of the shadow
-                            ),
+                          border: InputBorder.none,
+                        ),
+                        obscureText: !showConfirmPass,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      "Choose you title from the options below:",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            CustomTheme.accentColor4,
+                            CustomTheme.accentColor2
                           ],
-                          borderRadius: BorderRadius.circular(30),
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                        child: Row(
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.only(left: 12.0),
-                              child: Icon(Icons.badge, color: Colors.white),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 36.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _role = 'Patient';
-                                        });
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                        decoration: BoxDecoration(
-                                          color: _role == 'Patient' ? CustomTheme.accentColor2 : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(30),
-                                          border: Border.all(
-                                            color: _role == 'Patient' ? Colors.white : Colors.transparent,
-                                          ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            // Shadow color
+                            blurRadius: 20,
+                            // Blur radius
+                            offset: Offset(0, 0), // Offset of the shadow
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Row(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(left: 12.0),
+                            child: Icon(Icons.badge, color: Colors.white),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 36.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _role = 'Patient';
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
+                                      decoration: BoxDecoration(
+                                        color: _role == 'Patient'
+                                            ? CustomTheme.accentColor2
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(30),
+                                        border: Border.all(
+                                          color: _role == 'Patient'
+                                              ? Colors.white
+                                              : Colors.transparent,
                                         ),
-                                        child: Text(
-                                          'Patient',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
+                                      ),
+                                      child: Text(
+                                        'Patient',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ),
-                                    SizedBox(width: 10),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _role = 'Doctor';
-                                        });
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                        decoration: BoxDecoration(
-                                          color: _role == 'Doctor' ? CustomTheme.accentColor3 : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(30),
-                                          border: Border.all(
-                                            color: _role == 'Doctor' ? Colors.white : Colors.transparent,
-                                          ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _role = 'Doctor';
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
+                                      decoration: BoxDecoration(
+                                        color: _role == 'Doctor'
+                                            ? CustomTheme.accentColor4
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(30),
+                                        border: Border.all(
+                                          color: _role == 'Doctor'
+                                              ? Colors.white
+                                              : Colors.transparent,
                                         ),
-                                        child: Text(
-                                          'Doctor',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
+                                      ),
+                                      child: Text(
+                                        'Doctor',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),  // Shadow color
-                              blurRadius: 20,  // Blur radius
-                              offset: Offset(0, 0),  // Offset of the shadow
-                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            CustomTheme.accentColor4,
+                            CustomTheme.accentColor2
                           ],
-                          borderRadius: BorderRadius.circular(30),
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
-                        height: 50,
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            String errors = '';
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            // Shadow color
+                            blurRadius: 20,
+                            // Blur radius
+                            offset: Offset(0, 0), // Offset of the shadow
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      height: 50,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          String errors = '';
 
-                            if (_emailController.text.isEmpty) {
-                              errors += 'Please enter your email.\n';
-                            } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(_emailController.text)) {
-                              errors += 'Please enter a valid email.\n';
-                            }
+                          if (_emailController.text.isEmpty) {
+                            errors += 'Please enter your email.\n';
+                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                              .hasMatch(_emailController.text)) {
+                            errors += 'Please enter a valid email.\n';
+                          }
 
-                            if (_passwordController.text.isEmpty) {
-                              errors += 'Please enter your password.\n';
-                            } else if (_passwordController.text.length < 6) {
-                              errors += 'Password must be at least 6 characters long.\n';
-                            }
+                          if (_passwordController.text.isEmpty) {
+                            errors += 'Please enter your password.\n';
+                          } else if (_passwordController.text.length < 6) {
+                            errors +=
+                                'Password must be at least 6 characters long.\n';
+                          }
 
-                            if (_confirmPasswordController.text.isEmpty) {
-                              errors += 'Please confirm your password.\n';
-                            } else if (_passwordController.text.compareTo(_confirmPasswordController.text) != 0) {
-                              errors += 'Password and Confirm Password fields are not matched.\n';
-                            }
+                          if (_confirmPasswordController.text.isEmpty) {
+                            errors += 'Please confirm your password.\n';
+                          } else if (_passwordController.text
+                                  .compareTo(_confirmPasswordController.text) !=
+                              0) {
+                            errors +=
+                                'Password and Confirm Password fields are not matched.\n';
+                          }
 
-                            if (_nameController.text.isEmpty) {
-                              errors += 'Please enter your name.\n';
-                            }
+                          if (_nameController.text.isEmpty) {
+                            errors += 'Please enter your name.\n';
+                          }
 
-                            if (_role == null) {
-                              errors += 'Please select a role.\n';
-                            }
+                          if (_role == null) {
+                            errors += 'Please select a role.\n';
+                          }
 
-                            if (errors.isNotEmpty) {
-                              ErrorDialogWidget(message: errors.trim()).showErrorDialog(context);
-                              return;
-                            }
+                          if (errors.isNotEmpty) {
+                            ErrorDialogWidget(message: errors.trim())
+                                .showErrorDialog(context);
+                            return;
+                          }
 
-                            final message = await _authService.register(
-                              _emailController.text,
-                              _passwordController.text,
-                              _nameController.text,
-                              _role!,
+                          final message = await _authService.register(
+                            _emailController.text,
+                            _passwordController.text,
+                            _nameController.text,
+                            _role!,
+                          );
+
+                          if (message != null && !message.startsWith('E')) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                  builder: (context) => SignInScreen()),
+                              (Route<dynamic> route) => false,
                             );
-
-                            if (message != null && !message.startsWith('E')) {
+                          } else {
+                            ErrorDialogWidget(
+                                    message: message ?? 'Unknown error')
+                                .showErrorDialog(context);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shadowColor: Colors.transparent,
+                          primary: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          'Register',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Container(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Already have an account?",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          GestureDetector(
+                            onTap: () {
                               Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(builder: (context) => SignInScreen()),
-                                    (Route<dynamic> route) => false,
+                                MaterialPageRoute(
+                                    builder: (context) => SignInScreen()),
+                                (Route<dynamic> route) => false,
                               );
-                            } else {
-                              ErrorDialogWidget(message: message ?? 'Unknown error').showErrorDialog(context);
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            shadowColor: Colors.transparent,
-                            primary: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'Register',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      Container(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text(
-                              "Already have an account?",
+                            },
+                            child: const Text(
+                              'Sign in!',
                               style: TextStyle(
-                                  color: Colors.white
+                                decoration: TextDecoration.underline,
+                                fontWeight: FontWeight.bold,
+                                color: CustomTheme.accentColor,
                               ),
                             ),
-                            SizedBox(width: 10,),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).pushAndRemoveUntil(
-                                  MaterialPageRoute(builder: (context) => SignInScreen()),
-                                      (Route<dynamic> route) => false,
-                                );
-                              },
-                              child: const Text(
-                                'Sign in!',
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  fontWeight: FontWeight.bold,
-                                  color: CustomTheme.accentColor,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 20),
-                      if (_message != null)
-                        Text(
-                          _message!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 20),
+                    if (_message != null)
+                      Text(
+                        _message!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
       ),
-      );
+    );
   }
 }

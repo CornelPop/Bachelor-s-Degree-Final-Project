@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
 import 'package:hand_controller_app/ProfileFeature/screens/ProfileScreen.dart';
+import 'package:hand_controller_app/ProgressTrackingFeature/screens/ProgressTrackingScreen.dart';
+import 'package:hand_controller_app/SettingsFeature/screens/SettingsScreen.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/screens/TrainingProgramScreen.dart';
 
 import '../../AuthFeature/screens/SignInScreen.dart';
 import '../../AuthFeature/services/UserService.dart';
 import '../../DisplayingValuesFeature/screens/DisplayValuesScreen.dart';
-import '../../ProgressTrackingFeature/screens/ProgressTrackingScreen.dart';
 import '../../GlobalThemeData.dart';
 
-class SettingsDrawer extends StatelessWidget {
+class ProfileDashboardDrawer extends StatelessWidget {
   final String name;
   final String email;
   final AuthService authService;
   final UserService userService;
 
-  SettingsDrawer({
+  ProfileDashboardDrawer({
     Key? key,
     required this.name,
     required this.authService,
@@ -48,17 +49,18 @@ class SettingsDrawer extends StatelessWidget {
       ),
       child: Container(
         decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            borderRadius: BorderRadius.only(
-                topRight: Radius.circular(20),
-                bottomRight: Radius.circular(20)
-            )
+          gradient: LinearGradient(
+            colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(20),
+            bottomRight: Radius.circular(20)
+          )
         ),
         child: ListView(
+          physics: NeverScrollableScrollPhysics(),
           padding: EdgeInsets.all(5),
           children: [
             DrawerHeader(
@@ -74,14 +76,14 @@ class SettingsDrawer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Icon(Icons.person_outline, size: 50, color: Colors.white),
-                    SizedBox(width: 10),
+                    SizedBox(width: 10,),
                     Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(name, style: const TextStyle(fontSize: 20, color: Colors.white)),
-                        SizedBox(height: 10),
-                        Text(email, style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.5))),
+                        SizedBox(height: 10,),
+                        Text(email, style:  TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.5))),
                       ],
                     ),
                   ],
@@ -91,21 +93,19 @@ class SettingsDrawer extends StatelessWidget {
             const Divider(color: Colors.white), // Separation line
             ListTile(
               title: buildListTilesTitle(Icon(Icons.dashboard, color: Colors.white), 'Dashboard Programs'),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const TrainingProgramScreen(),
-                  ),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => TrainingProgramScreen()),
+                      (Route<dynamic> route) => false,
                 );
               },
             ),
             ListTile(
               title: buildListTilesTitle(Icon(Icons.assessment, color: Colors.white), 'Dashboard Values'),
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const DisplayValuesScreen(),
-                  ),
+              onTap: () async {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => DisplayValuesScreen()),
+                      (Route<dynamic> route) => false,
                 );
               },
             ),
@@ -118,24 +118,25 @@ class SettingsDrawer extends StatelessWidget {
                 );
               },
             ),
-            ListTile(
-              title: buildListTilesTitle(Icon(Icons.person, color: Colors.white), 'Profile'),
-              onTap: () async {
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(builder: (context) => ProfileScreen()),
-                      (Route<dynamic> route) => false,
-                );
-              },
-            ),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(30),
               ),
               child: ListTile(
-                title: buildListTilesTitle(Icon(Icons.settings, color: Colors.white), 'Settings'),
+                title: buildListTilesTitle(Icon(Icons.person, color: Colors.white), 'Profile'),
                 onTap: () {},
               ),
+            ),
+            ListTile(
+              title: buildListTilesTitle(Icon(Icons.settings, color: Colors.white), 'Settings'),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const SettingsScreen(),
+                  ),
+                );
+              },
             ),
             ListTile(
               title: buildListTilesTitle(Icon(Icons.exit_to_app, color: Colors.white), 'Sign out'),

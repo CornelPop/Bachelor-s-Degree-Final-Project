@@ -10,7 +10,7 @@ class ExitDialog {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
         ),
-        title: const Text("Exit app"),
+        title: Container(child: const Text("Exit app")),
         content: const Text("Are you sure you want to exit?"),
         actions: [
           TextButton(

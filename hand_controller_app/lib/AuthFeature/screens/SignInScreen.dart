@@ -5,7 +5,7 @@ import 'package:hand_controller_app/TrainingProgramsFeature/screens/TrainingProg
 
 import '../../GlobalThemeData.dart';
 import '../services/AuthService.dart';
-import '../widgets/ErrorDialogWidget.dart';
+import '../../AlertDialogs/ErrorDialogWidget.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -51,6 +51,7 @@ class _SignInScreenState extends State<SignInScreen> {
         ),
       ),
       child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
         child: Column(
           children: [
             Container(
@@ -59,9 +60,7 @@ class _SignInScreenState extends State<SignInScreen> {
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(30),
-                border: Border.all(
-                  color: Colors.transparent
-                ),
+                border: Border.all(color: Colors.transparent),
               ),
               child: Image.asset(
                 "images/logo.png",
@@ -85,15 +84,18 @@ class _SignInScreenState extends State<SignInScreen> {
                     height: 50,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
+                        colors: [
+                          CustomTheme.accentColor4,
+                          CustomTheme.accentColor2
+                        ],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),  // Shadow color
-                          blurRadius: 20,  // Blur radius
-                          offset: Offset(0, 0),  // Offset of the shadow
+                          color: Colors.black.withOpacity(0.2), // Shadow color
+                          blurRadius: 20, // Blur radius
+                          offset: Offset(0, 0), // Offset of the shadow
                         ),
                       ],
                       borderRadius: BorderRadius.circular(30),
@@ -114,15 +116,18 @@ class _SignInScreenState extends State<SignInScreen> {
                     height: 50,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
+                        colors: [
+                          CustomTheme.accentColor4,
+                          CustomTheme.accentColor2
+                        ],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),  // Shadow color
-                          blurRadius: 20,  // Blur radius
-                          offset: Offset(0, 0),  // Offset of the shadow
+                          color: Colors.black.withOpacity(0.2), // Shadow color
+                          blurRadius: 20, // Blur radius
+                          offset: Offset(0, 0), // Offset of the shadow
                         ),
                       ],
                       borderRadius: BorderRadius.circular(30),
@@ -157,10 +162,11 @@ class _SignInScreenState extends State<SignInScreen> {
                       onTap: () async {
                         if (_emailController.text.isEmpty) {
                           ErrorDialogWidget(
-                              message: "You must fill the email field")
+                                  message: "You must fill the email field")
                               .showErrorDialog(context);
                         } else {
-                          await _authService.sendPasswordResetEmail(_emailController.text);
+                          await _authService
+                              .sendPasswordResetEmail(_emailController.text);
                         }
                       },
                       child: const Text(
@@ -179,7 +185,8 @@ class _SignInScreenState extends State<SignInScreen> {
                       children: [
                         Checkbox(
                           checkColor: CustomTheme.secondaryColor,
-                          fillColor: MaterialStateProperty.resolveWith((states) {
+                          fillColor:
+                              MaterialStateProperty.resolveWith((states) {
                             return CustomTheme.accentColor;
                           }),
                           value: isChecked,
@@ -189,7 +196,10 @@ class _SignInScreenState extends State<SignInScreen> {
                             });
                           },
                         ),
-                        const Text('Remember me', style: TextStyle(color: CustomTheme.secondaryColor),),
+                        const Text(
+                          'Remember me',
+                          style: TextStyle(color: CustomTheme.secondaryColor),
+                        ),
                       ],
                     ),
                   ),
@@ -197,15 +207,18 @@ class _SignInScreenState extends State<SignInScreen> {
                     height: 50,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
+                        colors: [
+                          CustomTheme.accentColor4,
+                          CustomTheme.accentColor2
+                        ],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),  // Shadow color
-                          blurRadius: 20,  // Blur radius
-                          offset: Offset(0, 0),  // Offset of the shadow
+                          color: Colors.black.withOpacity(0.2), // Shadow color
+                          blurRadius: 20, // Blur radius
+                          offset: Offset(0, 0), // Offset of the shadow
                         ),
                       ],
                       borderRadius: BorderRadius.circular(30),
@@ -217,18 +230,21 @@ class _SignInScreenState extends State<SignInScreen> {
 
                         if (_emailController.text.isEmpty) {
                           errors += 'Please enter your email.\n';
-                        } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(_emailController.text)) {
+                        } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                            .hasMatch(_emailController.text)) {
                           errors += 'Please enter a valid email.\n';
                         }
 
                         if (_passwordController.text.isEmpty) {
                           errors += 'Please enter your password.\n';
                         } else if (_passwordController.text.length < 6) {
-                          errors += 'Password must be at least 6 characters long.\n';
+                          errors +=
+                              'Password must be at least 6 characters long.\n';
                         }
 
                         if (errors.isNotEmpty) {
-                          ErrorDialogWidget(message: errors.trim()).showErrorDialog(context);
+                          ErrorDialogWidget(message: errors.trim())
+                              .showErrorDialog(context);
                           return;
                         }
 
@@ -244,26 +260,26 @@ class _SignInScreenState extends State<SignInScreen> {
                         if (message != null && !message.startsWith('E')) {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => TrainingProgramScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => TrainingProgramScreen()),
                           );
                           sharedPrefsService.storeRememberMe(isChecked);
                         } else {
-
                           if (message != null) {
                             if (message.contains("INVALID_LOGIN_CREDENTIALS")) {
                               ErrorDialogWidget(
-                                  message: "Invalid email or password")
+                                      message: "Invalid email or password")
                                   .showErrorDialog(context);
                             } else if (message.contains("all requests")) {
                               ErrorDialogWidget(
-                                  message: "Something went wrong. Try again later.")
+                                      message:
+                                          "Something went wrong. Try again later.")
                                   .showErrorDialog(context);
                             } else {
                               ErrorDialogWidget(message: message)
                                   .showErrorDialog(context);
                             }
                           }
-
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -320,15 +336,18 @@ class _SignInScreenState extends State<SignInScreen> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [CustomTheme.accentColor3, CustomTheme.accentColor2],
+                        colors: [
+                          CustomTheme.accentColor4,
+                          CustomTheme.accentColor2
+                        ],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),  // Shadow color
-                          blurRadius: 20,  // Blur radius
-                          offset: Offset(0, 0),  // Offset of the shadow
+                          color: Colors.black.withOpacity(0.2), // Shadow color
+                          blurRadius: 20, // Blur radius
+                          offset: Offset(0, 0), // Offset of the shadow
                         ),
                       ],
                       borderRadius: BorderRadius.circular(30),
@@ -336,13 +355,15 @@ class _SignInScreenState extends State<SignInScreen> {
                         color: Colors.transparent,
                       ),
                     ),
-                    padding: const EdgeInsets.all(2), // Padding to display the border
+                    padding: const EdgeInsets.all(2),
+                    // Padding to display the border
                     child: ElevatedButton(
                       onPressed: () async {
                         if (await _authService.signInWithGoogle() != null) {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => TrainingProgramScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => TrainingProgramScreen()),
                           );
                         }
                       },
@@ -389,7 +410,8 @@ class _SignInScreenState extends State<SignInScreen> {
                           onTap: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => RegisterScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => RegisterScreen()),
                             );
                           },
                           child: const Text(

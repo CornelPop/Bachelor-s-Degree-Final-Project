@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../GlobalThemeData.dart';
-import '../models/TrainingProgram.dart';
-import '../screens/ProgramDetailsScreen.dart';
+import '../../TrainingProgramsFeature/models/TrainingProgram.dart';
+import '../../TrainingProgramsFeature/screens/ProgramDetailsScreen.dart';
 
-class ProgramContainer extends StatelessWidget {
+class DoneProgramContainer extends StatelessWidget {
   final TrainingProgram program;
   final String title;
+  final String date;
   final String subtitle;
   final String difficulty;
 
-  ProgramContainer({
+  DoneProgramContainer({
     required this.program,
     required this.title,
+    required this.date,
     required this.subtitle,
     required this.difficulty,
   });
@@ -48,7 +50,6 @@ class ProgramContainer extends StatelessWidget {
       },
       child: Container(
         height: MediaQuery.of(context).size.height * 0.15,
-        width: MediaQuery.of(context).size.width * 0.7,
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(12),
@@ -58,6 +59,7 @@ class ProgramContainer extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(title, style: TextStyle(color: Colors.white),),
+            Text(date, style: TextStyle(color: Colors.white),),
             Text(subtitle, style: TextStyle(color: Colors.white),),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

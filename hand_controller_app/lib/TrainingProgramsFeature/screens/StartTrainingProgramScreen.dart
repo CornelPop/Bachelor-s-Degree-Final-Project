@@ -4,12 +4,13 @@ import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/screens/TrainingProgramScreen.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/widgets/CountdownTimerWidget.dart';
 
+import '../../GlobalThemeData.dart';
 import '../models/TrainingProgram.dart';
 
 class StartTrainingProgramScreen extends StatefulWidget {
   final TrainingProgram program;
 
-  const StartTrainingProgramScreen({Key? key, required this.program}) : super(key: key);
+  StartTrainingProgramScreen({Key? key, required this.program}) : super(key: key);
 
   @override
   _StartTrainingProgramScreenState createState() => _StartTrainingProgramScreenState();
@@ -116,6 +117,9 @@ class _StartTrainingProgramScreenState extends State<StartTrainingProgramScreen>
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text("Program Completed"),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
         content: const Text("Congratulations! You have completed the program."),
         actions: [
           TextButton(
@@ -159,52 +163,135 @@ class _StartTrainingProgramScreenState extends State<StartTrainingProgramScreen>
     }
   }
 
+  Future<void> _addTrainingProgramToCompleted(TrainingProgram trainingProgram) async {
+    String? uid = await userService.getUserUid();
+    if (uid != null) {
+      userService.addCompletedProgram(uid, trainingProgram);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.program.name),
-      ),
-      body: Center(
-        child: _currentExerciseIndex == -1
-            ? Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              "Get ready to start the program!",
-              style: TextStyle(fontSize: 24),
-              textAlign: TextAlign.center,
+      body: Stack(
+        children: [
+          // Gradient Background for the Top Container
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
             ),
-            const SizedBox(height: 20),
-            CountdownTimer(currentTime: _currentTime, animation: _animation),
-          ],
-        )
-            : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              widget.program.exercises[_currentExerciseIndex].name,
-              style: const TextStyle(fontSize: 24),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            CountdownTimer(currentTime: _currentTime, animation: _animation),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _cancelExistingTimer();
-                if (_currentExerciseIndex < widget.program.exercises.length - 1) {
-                  _isExerciseActive = false;
-                  _startExercise();
-                } else {
-                  _updateExerciseCounter(widget.program.category, _stopwatchEntireProgram.elapsed.inSeconds);
-                  _showCompletionDialog();
-                }
-              },
-              child: const Text("Next Exercise"),
-            ),
-          ],
-        ),
+            height: kToolbarHeight + 20,
+          ),
+          Column(
+            children: [
+              // Transparent AppBar
+              AppBar(
+                backgroundColor: Colors.transparent,
+                centerTitle: true,
+                title: Text(widget.program.name),
+                elevation: 0,
+              ),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  ),
+                  child: Center(
+                    child: _currentExerciseIndex == -1
+                        ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          "Get ready to start the program!",
+                          style: TextStyle(fontSize: 24, color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        CountdownTimer(currentTime: _currentTime, animation: _animation),
+                      ],
+                    )
+                        : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          widget.program.exercises[_currentExerciseIndex].name,
+                          style: const TextStyle(fontSize: 24, color: Colors.white),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 20),
+                        CountdownTimer(currentTime: _currentTime, animation: _animation),
+                        const SizedBox(height: 20),
+                        Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                CustomTheme.accentColor4,
+                                CustomTheme.accentColor2,
+                              ],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 20,
+                                offset: Offset(0, 0),
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _cancelExistingTimer();
+                              if (_currentExerciseIndex < widget.program.exercises.length - 1) {
+                                _isExerciseActive = false;
+                                _startExercise();
+                              } else {
+                                _updateExerciseCounter(widget.program.category, _stopwatchEntireProgram.elapsed.inSeconds);
+                                _addTrainingProgramToCompleted(widget.program);
+                                _showCompletionDialog();
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.transparent, // Make the button background transparent
+                              shadowColor: Colors.transparent, // Remove the shadow
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30), // Match the border radius of the container
+                              ),
+                              elevation: 0, // Remove elevation
+                            ),
+                            child: const Text(
+                              "Next Exercise",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white, // Set text color to white
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
