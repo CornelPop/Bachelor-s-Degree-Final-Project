@@ -54,7 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 child: Image.asset(
-                  "images/logo.png",
+                  "assets/images/logo.png",
                 ),
               ),
               Padding(

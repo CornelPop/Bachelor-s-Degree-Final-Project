@@ -63,7 +63,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 border: Border.all(color: Colors.transparent),
               ),
               child: Image.asset(
-                "images/logo.png",
+                "assets/images/logo.png",
               ),
             ),
             Padding(
@@ -379,7 +379,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset(
-                            "images/google_logo.png",
+                            "assets/images/google_logo.png",
                             fit: BoxFit.cover,
                             width: 25,
                             height: 25,

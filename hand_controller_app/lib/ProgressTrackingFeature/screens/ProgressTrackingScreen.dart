@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:hand_controller_app/ProgressTrackingFeature/services/PdfService.dart';
 import 'package:hand_controller_app/ProgressTrackingFeature/widgets/LastMonthTotalNumberByCategoryPieChart.dart';
 import 'package:hand_controller_app/ProgressTrackingFeature/widgets/LastWeekTotalNumberLineChart.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,7 @@ class ProgressTrackingScreen extends StatefulWidget {
 class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
   final UserService userService = UserService();
   final AuthService authService = AuthService();
+  final PdfService pdfService = PdfService();
 
   String name = '';
   String email = '';
@@ -44,17 +46,14 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
     String? uid = await userService.getUserUid();
     if (uid != null) {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
+      List<TrainingProgram> programs = await userService.getCompletedPrograms(uid);
       if (userData != null) {
         setState(() async {
           name = userData['name'] as String;
           email = userData['email'] as String;
           role = userData['role'] as String;
-
-          List<TrainingProgram> programs = await userService.getCompletedPrograms(uid);
-          setState(() {
-            completedPrograms = programs;
-            _sortPrograms();
-          });
+          completedPrograms = programs;
+          _sortPrograms();
         });
       } else {
         print('No user data found.');
@@ -227,7 +226,9 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
                     ),
                     elevation: 0,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    pdfService.generateAndSavePDF(name, completedPrograms);
+                  },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
