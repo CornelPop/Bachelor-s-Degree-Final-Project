@@ -6,6 +6,9 @@ import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
+import '../models/Doctor.dart';
+import '../models/Patient.dart';
+
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -41,18 +44,42 @@ class AuthService {
 
       final encryptedPassword = encrypted.encrypt(password, iv: iv).base64;
 
-      await _firestore.collection('users').doc(userCredential.user!.uid).set({
-        'name': name,
-        'createdAt': Timestamp.now(),
-        'role': role,
-        'email': email,
-        'password': encryptedPassword,
-        'numberBeginnerExercises': 0,
-        'numberIntermediateExercises': 0,
-        'numberDifficultExercises': 0,
-        'timeSpentInWorkouts': 0,
-        'accuracyOfExercises': 0,
-      });
+      // await _firestore.collection('users').doc(userCredential.user!.uid).set({
+      //   'name': name,
+      //   'createdAt': Timestamp.now(),
+      //   'role': role,
+      //   'email': email,
+      //   'password': encryptedPassword,
+      //   'numberBeginnerExercises': 0,
+      //   'numberIntermediateExercises': 0,
+      //   'numberDifficultExercises': 0,
+      //   'timeSpentInWorkouts': 0,
+      //   'accuracyOfExercises': 0,
+      // });
+
+      Map<String, dynamic> userMap;
+
+      if (role == 'Doctor') {
+        userMap = Doctor(
+          uid: userCredential.user!.uid,
+          createdAt: Timestamp.now().toDate().toString(),
+          name: name,
+          email: email,
+          password: encryptedPassword,
+          role: role,
+        ).toMap();
+      } else {
+        userMap = Patient(
+          uid: userCredential.user!.uid,
+          createdAt: Timestamp.now().toDate().toString(),
+          name: name,
+          email: email,
+          password: encryptedPassword,
+          role: role,
+        ).toMap();
+      }
+
+      await _firestore.collection('users').doc(userCredential.user!.uid).set(userMap);
 
       return 'User registered: ${userCredential.user!.email}';
     } catch (e) {
@@ -81,8 +108,9 @@ class AuthService {
       DocumentSnapshot userDoc = await _firestore.collection('users').doc(user!.uid).get();
       if (!userDoc.exists) {
         await _firestore.collection('users').doc(user.uid).set({
+          'uid': userCredential.user!.uid,
           'name': googleUser.displayName,
-          'createdAt': Timestamp.now(),
+          'createdAt': Timestamp.now().toDate().toString(),
           'role': 'Patient',
           'email': googleUser.email,
           'numberBeginnerExercises': 0,
@@ -90,6 +118,7 @@ class AuthService {
           'numberDifficultExercises': 0,
           'timeSpentInWorkouts': 0,
           'accuracyOfExercises': 0,
+          'doctorId': '',
         });
       }
 

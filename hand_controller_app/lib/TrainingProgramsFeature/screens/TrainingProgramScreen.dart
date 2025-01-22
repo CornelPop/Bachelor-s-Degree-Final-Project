@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
@@ -86,8 +87,6 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _fetchUserDataFuture = fetchUserData();
-
     var screenSize = MediaQuery.of(context).size;
     screenWidth = screenSize.width;
     screenHeight = screenSize.height;
@@ -102,7 +101,27 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
         return await ExitDialog.showExitDialog(context);
       },
       child: Scaffold(
-        drawer: _buildDrawer(),
+        drawer: FutureBuilder(
+          future: _fetchUserDataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  ),
+                  child: const Center(
+                      child: CircularProgressIndicator()));
+            } else {
+              return _buildDrawer();
+            }
+          },
+        ),
         body: Stack(
           children: [
             Container(

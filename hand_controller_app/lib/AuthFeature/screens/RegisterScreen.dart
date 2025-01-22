@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
 import 'package:hand_controller_app/AlertDialogs/ErrorDialogWidget.dart';
@@ -24,6 +26,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _role;
   bool showPass = false;
   bool showConfirmPass = false;
+  bool isPatientOptionChosen = false;
 
   @override
   Widget build(BuildContext context) {
@@ -276,6 +279,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 children: [
                                   GestureDetector(
                                     onTap: () {
+                                      isPatientOptionChosen = true;
                                       setState(() {
                                         _role = 'Patient';
                                       });
@@ -306,6 +310,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   SizedBox(width: 10),
                                   GestureDetector(
                                     onTap: () {
+                                      isPatientOptionChosen = false;
                                       setState(() {
                                         _role = 'Doctor';
                                       });

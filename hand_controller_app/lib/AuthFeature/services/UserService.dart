@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hand_controller_app/AuthFeature/models/User.dart';
+import 'package:hand_controller_app/ProfileFeature/models/MedicalHistory.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../TrainingProgramsFeature/models/TrainingProgram.dart';
@@ -71,6 +71,43 @@ class UserService {
           .toList();
     } catch (e) {
       print("Error getting completed programs: $e");
+      return [];
+    }
+  }
+
+  Future<List<Consultation>> getConsultations(String userId) async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    try {
+      QuerySnapshot querySnapshot = await firestore
+          .collection('users')
+          .doc(userId)
+          .collection('consultations')
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => Consultation.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      print("Error getting consultations: $e");
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getUsersByRole(String role) async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: role)
+          .get();
+
+      List<Map<String, dynamic>> users = querySnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+
+      return users;
+    } catch (e) {
+      print('Error fetching users by role: $e');
       return [];
     }
   }

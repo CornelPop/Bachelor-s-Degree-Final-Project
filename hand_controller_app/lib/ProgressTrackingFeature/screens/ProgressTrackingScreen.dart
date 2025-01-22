@@ -88,7 +88,27 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
         return await ExitDialog.showExitDialog(context);
       },
       child: Scaffold(
-        drawer: _buildDrawer(),
+        drawer: FutureBuilder(
+          future: _fetchUserDataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  ),
+                  child: const Center(
+                      child: CircularProgressIndicator()));
+            } else {
+              return _buildDrawer();
+            }
+          },
+        ),
         body: Stack(
           children: [
             Container(

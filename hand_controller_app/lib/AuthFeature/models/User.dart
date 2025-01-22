@@ -1,4 +1,3 @@
-
 class User {
   String uid;
   String createdAt;
@@ -6,11 +5,6 @@ class User {
   String email;
   String password;
   String role;
-  int numberBeginnerExercises;
-  int numberIntermediateExercises;
-  int numberDifficultExercises;
-  int timeSpentInWorkouts;
-  double accuracyOfExercises;
 
   User({
     required this.uid,
@@ -19,11 +13,6 @@ class User {
     required this.email,
     required this.password,
     required this.role,
-    required this.numberBeginnerExercises,
-    required this.numberIntermediateExercises,
-    required this.numberDifficultExercises,
-    required this.timeSpentInWorkouts,
-    required this.accuracyOfExercises,
   });
 
   Map<String, dynamic> toMap() {
@@ -34,11 +23,6 @@ class User {
       'email': email,
       'password': password,
       'role': role,
-      'numberBeginnerExercises': numberBeginnerExercises,
-      'numberIntermediateExercises': numberIntermediateExercises,
-      'numberDifficultExercises': numberDifficultExercises,
-      'timeSpentInWorkouts': timeSpentInWorkouts,
-      'accuracyOfExercises': accuracyOfExercises,
     };
   }
 
@@ -50,11 +34,7 @@ class User {
       email: map['email'],
       password: map['password'],
       role: map['role'],
-      numberBeginnerExercises: map['numberBeginnerExercises'],
-      numberIntermediateExercises: map['numberIntermediateExercises'],
-      numberDifficultExercises: map['numberDifficultExercises'],
-      timeSpentInWorkouts: map['timeSpentInWorkouts'],
-      accuracyOfExercises: map['accuracyOfExercises'],
     );
   }
 }
+

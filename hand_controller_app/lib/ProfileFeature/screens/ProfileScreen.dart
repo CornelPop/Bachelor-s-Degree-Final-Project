@@ -1,10 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/SharedPrefService.dart';
+import 'package:hand_controller_app/ProfileFeature/models/MedicalHistory.dart';
 import 'package:hand_controller_app/ProfileFeature/widgets/ProfileDashboardDrawer.dart';
+import 'package:hand_controller_app/ProfileFeature/widgets/ProfileDoctorContentWidget.dart';
 import '../../AuthFeature/services/AuthService.dart';
 import '../../AuthFeature/services/UserService.dart';
 import '../../AlertDialogs/ExitDialogWidget.dart';
 import '../../GlobalThemeData.dart';
+import '../widgets/ProfilePatientContentWidget.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,6 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String name = '';
   String email = '';
   String role = '';
+  List<Consultation> consultations = [];
 
   late Future<void> _fetchUserDataFuture;
 
@@ -33,11 +38,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String? uid = await userService.getUserUid();
     if (uid != null) {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
+      List<Consultation> consultationsLocal = await userService.getConsultations(uid);
       if (userData != null) {
         setState(() {
           name = userData['name'] as String;
           email = userData['email'] as String;
           role = userData['role'] as String;
+          consultations = consultationsLocal;
+          if (kDebugMode) {
+            print(consultations);
+          }
         });
       } else {
         print('No user data found.');
@@ -47,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -54,7 +65,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return await ExitDialog.showExitDialog(context);
       },
       child: Scaffold(
-        drawer: _buildDrawer(),
+        drawer: FutureBuilder(
+          future: _fetchUserDataFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                  ),
+                  child: const Center(
+                      child: CircularProgressIndicator()));
+            } else {
+              return _buildDrawer();
+            }
+          },
+        ),
         body: Stack(
           children: [
             Container(
@@ -87,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         return Container(
                             height: MediaQuery.of(context).size.height,
                             width: MediaQuery.of(context).size.width,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               gradient: LinearGradient(
                                 colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
                                 begin: Alignment.centerLeft,
@@ -97,7 +128,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: const Center(
                                 child: CircularProgressIndicator()));
                       } else {
-                        return profileContentWidget();
+                        if (role == "Patient") {
+                          return ProfilePatientContentWidget(name: name,
+                            email: email,
+                            consultations: consultations,
+                            authService: authService,
+                            userService: userService,);
+                        }
+                        else if (role == "Doctor") {
+                          return ProfileDoctorContentWidget(name: name,
+                            email: email,
+                            authService: authService,
+                            userService: userService,);
+                        }
+                        return Container();
                       }
                     },
                   ),
@@ -116,53 +160,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       email: email,
       authService: authService,
       userService: userService,
-    );
-  }
-
-  Widget profileContentWidget() {
-    return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-      ),
-      child: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, size: 50, color: CustomTheme.mainColor),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              name,
-              style: const TextStyle(fontSize: 24, color: Colors.white),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              email,
-              style: const TextStyle(fontSize: 16, color: Colors.white70),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              role,
-              style: const TextStyle(fontSize: 16, color: Colors.white70),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Profile Page content goes here',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

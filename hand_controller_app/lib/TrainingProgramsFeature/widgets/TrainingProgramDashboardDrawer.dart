@@ -72,7 +72,7 @@ class TrainingProgramDashboardDrawer extends StatelessWidget {
               ),
               child: Center(
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Icon(Icons.person_outline, size: 50, color: Colors.white),
