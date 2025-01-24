@@ -1,4 +1,3 @@
-import '../../ProfileFeature/models/MedicalHistory.dart';
 import 'User.dart';
 
 class Patient extends User {
@@ -54,4 +53,5 @@ class Patient extends User {
       accuracyOfExercises: map['accuracyOfExercises'] ?? 0.0
     );
   }
+
 }

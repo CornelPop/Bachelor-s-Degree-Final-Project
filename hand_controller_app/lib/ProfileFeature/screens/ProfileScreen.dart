@@ -2,12 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/SharedPrefService.dart';
 import 'package:hand_controller_app/ProfileFeature/models/MedicalHistory.dart';
+import 'package:hand_controller_app/ProfileFeature/services/RatingService.dart';
 import 'package:hand_controller_app/ProfileFeature/widgets/ProfileDashboardDrawer.dart';
 import 'package:hand_controller_app/ProfileFeature/widgets/ProfileDoctorContentWidget.dart';
 import '../../AuthFeature/services/AuthService.dart';
 import '../../AuthFeature/services/UserService.dart';
 import '../../AlertDialogs/ExitDialogWidget.dart';
 import '../../GlobalThemeData.dart';
+import '../models/Rating.dart';
 import '../widgets/ProfilePatientContentWidget.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -18,13 +20,21 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
   final UserService userService = UserService();
   final AuthService authService = AuthService();
+  final RatingService ratingService = RatingService();
 
+  String userId = '';
   String name = '';
   String email = '';
   String role = '';
+
+  String assignedDoctorId = '';
+  String assignedDoctorName = '';
+  String assignedDoctorEmail = '';
   List<Consultation> consultations = [];
+  List<Rating> ratings = [];
 
   late Future<void> _fetchUserDataFuture;
 
@@ -40,15 +50,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
       List<Consultation> consultationsLocal = await userService.getConsultations(uid);
       if (userData != null) {
+
         setState(() {
+          userId = uid;
           name = userData['name'] as String;
           email = userData['email'] as String;
           role = userData['role'] as String;
           consultations = consultationsLocal;
-          if (kDebugMode) {
-            print(consultations);
-          }
+          assignedDoctorId = userData['doctorId'] as String;
         });
+
+        Map<String, dynamic>? assignedDoctorData = await userService.getUserData(userData['doctorId'] as String);
+        List<Rating> ratingsLocal = await ratingService.getRatings(userData['doctorId'] as String);
+
+        if (assignedDoctorData != null) {
+          assignedDoctorName = assignedDoctorData['name'] as String;
+          assignedDoctorEmail = assignedDoctorData['email'] as String;
+          ratings = ratingsLocal;
+        }
+
       } else {
         print('No user data found.');
       }
@@ -129,9 +149,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: CircularProgressIndicator()));
                       } else {
                         if (role == "Patient") {
-                          return ProfilePatientContentWidget(name: name,
+                          return ProfilePatientContentWidget(userId: userId,
+                            name: name,
                             email: email,
                             consultations: consultations,
+                            ratings: ratings,
+                            assignedDoctorId: assignedDoctorId,
+                            assignedDoctorName: assignedDoctorName,
+                            assignedDoctorEmail: assignedDoctorEmail,
                             authService: authService,
                             userService: userService,);
                         }

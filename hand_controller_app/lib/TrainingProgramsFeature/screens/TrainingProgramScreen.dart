@@ -8,6 +8,7 @@ import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
 import 'package:hand_controller_app/ProgressTrackingFeature/screens/ProgressTrackingScreen.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/widgets/TrainingProgramDashboardDrawer.dart';
 import '../../AlertDialogs/ExitDialogWidget.dart';
+import '../../AuthFeature/models/Patient.dart';
 import '../../GlobalThemeData.dart';
 import '../models/MockDataTrainingPrograms.dart';
 import '../models/TrainingProgram.dart';
@@ -28,15 +29,6 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
   String email = '';
   String role = '';
 
-  String flexSensorValue = '';
-  Timer? timer;
-  bool isTimerRunning = false;
-  int progressPercentage = 0;
-
-  TrainingProgram? selectedProgram;
-  int currentExerciseIndex = 0;
-  Map<String, int> currentFlexValues = {};
-
   late double screenWidth;
   late double screenHeight;
   late double buttonWidth;
@@ -47,9 +39,23 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
   int numberIntermediateExercises = 0;
   int numberDifficultExercises = 0;
   int timeSpentInWorkouts = 0;
-  int accuracyOfExercises = 0;
+  double accuracyOfExercises = 0.0;
 
   late Future<void> _fetchUserDataFuture;
+
+  bool _isFilterTileExpended = false;
+
+  late List<Patient> patients;
+  List<Patient> filteredPatients = [];
+  List<bool> _isExpandedList = [];
+  TextEditingController searchController = TextEditingController();
+
+  late String userId;
+
+  String _searchByField = 'name';
+  String _orderByField = 'name';
+  bool _isAscending = true;
+  String _searchedString = '';
 
   @override
   void initState() {
@@ -57,31 +63,198 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
     _fetchUserDataFuture = fetchUserData();
   }
 
-  Future<void> fetchUserData() async {
+  void _applyFilters() {
+    setState(() {
+      filteredPatients = patients.where((doctor) {
+        String valueToSearch = '';
+        switch (_searchByField) {
+          case 'name':
+            valueToSearch = doctor.name;
+            break;
+          case 'specialization':
+            //valueToSearch = doctor.specialization;
+            break;
+        }
+        return valueToSearch
+            .toLowerCase()
+            .contains(_searchedString.toLowerCase());
+      }).toList();
+
+      if (_orderByField.isNotEmpty) {
+        filteredPatients.sort((a, b) {
+          var valueA = '';
+          var valueB = '';
+          switch (_orderByField) {
+            case 'name':
+              valueA = a.name.toLowerCase();
+              valueB = b.name.toLowerCase();
+              break;
+            case 'rating':
+              //valueA = a.rating.toString();
+              //valueB = b.rating.toString();
+              break;
+          }
+          return _isAscending
+              ? valueA.compareTo(valueB)
+              : valueB.compareTo(valueA);
+        });
+      }
+    });
+  }
+
+  Widget _buildOrderByButton(String field, String label) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (_orderByField == field) {
+            _isAscending = !_isAscending;
+          } else {
+            _orderByField = field;
+            _isAscending = true;
+          }
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: _orderByField == field
+              ? CustomTheme.accentColor2
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: _orderByField == field ? Colors.white : Colors.transparent,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            if (_orderByField == field)
+              Icon(
+                _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                color: Colors.white,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchByButton(String field, String label) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _searchByField = field;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: _searchByField == field
+              ? CustomTheme.accentColor2
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(
+            color: _searchByField == field ? Colors.white : Colors.transparent,
+          ),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _filterBySearchField(String searchText) {
+    setState(() {
+      filteredPatients = patients.where((patient) {
+        String valueToSearch = '';
+        switch (_searchByField) {
+          case 'name':
+            valueToSearch = patient.name;
+            break;
+          case 'specialization':
+            //valueToSearch = patient.;
+            break;
+        }
+        return valueToSearch.toLowerCase().contains(searchText.toLowerCase());
+      }).toList();
+    });
+  }
+
+  Future<Map<String, dynamic>?> fetchUserData() async {
     String? uid = await userService.getUserUid();
     if (uid != null) {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
       if (userData != null) {
-        setState(() {
-          name = userData['name'] as String;
-          email = userData['email'] as String;
-          role = userData['role'] as String;
+        if (userData['role'] as String == 'Patient') {
 
-          numberBeginnerExercises = userData['numberBeginnerExercises'] as int;
-          numberIntermediateExercises =
-              userData['numberIntermediateExercises'] as int;
-          numberDifficultExercises =
-              userData['numberDifficultExercises'] as int;
-          timeSpentInWorkouts = userData['timeSpentInWorkouts'] as int;
-          accuracyOfExercises = userData['accuracyOfExercises'] as int;
-        });
+          setState(() {
+            name = userData['name'] as String;
+            email = userData['email'] as String;
+            role = userData['role'] as String;
+
+            numberBeginnerExercises =
+            userData['numberBeginnerExercises'] as int;
+            numberIntermediateExercises =
+            userData['numberIntermediateExercises'] as int;
+            numberDifficultExercises =
+            userData['numberDifficultExercises'] as int;
+            timeSpentInWorkouts = userData['timeSpentInWorkouts'] as int;
+            accuracyOfExercises = userData['accuracyOfExercises'] as double;
+          });
+
+          return {
+            'role': 'Patient',
+            'name': userData['name'] as String,
+            'email': userData['email'] as String,
+            'numberBeginnerExercises': userData['numberBeginnerExercises'] as int,
+            'numberIntermediateExercises': userData['numberIntermediateExercises'] as int,
+            'numberDifficultExercises': userData['numberDifficultExercises'] as int,
+            'timeSpentInWorkouts': userData['timeSpentInWorkouts'] as int,
+            'accuracyOfExercises': userData['accuracyOfExercises'] as double,
+          };
+        } else if (userData['role'] as String == 'Doctor') {
+          List<dynamic>? patientsLocal = await userService.getPatientsByDoctorId(uid);
+
+          setState(() {
+            name = userData['name'] as String;
+            email = userData['email'] as String;
+            role = userData['role'] as String;
+
+            userId = uid;
+            patients = patientsLocal.cast<Patient>();
+            filteredPatients = patients;
+            _isExpandedList = List.generate(patients.length, (index) => false);
+          });
+
+          return {
+            'role': 'Doctor',
+            'name': userData['name'] as String,
+            'email': userData['email'] as String,
+            'userId': uid,
+            'patients': patientsLocal.cast<Patient>(),
+          };
+        }
       } else {
         print('No user data found.');
       }
     } else {
       print('No UID found in SharedPreferences.');
     }
+    return null; // Return null if no data is found
   }
+
 
   @override
   void didChangeDependencies() {
@@ -100,79 +273,93 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
       onWillPop: () async {
         return await ExitDialog.showExitDialog(context);
       },
-      child: Scaffold(
-        drawer: FutureBuilder(
-          future: _fetchUserDataFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
+      child: FutureBuilder(
+        future: _fetchUserDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Scaffold(
+              body: Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
                   ),
-                  child: const Center(
-                      child: CircularProgressIndicator()));
-            } else {
-              return _buildDrawer();
-            }
-          },
-        ),
-        body: Stack(
-          children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
                 ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
+                child: const Center(child: CircularProgressIndicator()),
               ),
-              height: kToolbarHeight + 20,
-            ),
-            Column(
-              children: [
-                AppBar(
-                  backgroundColor: Colors.transparent,
-                  centerTitle: true,
-                  title: const Text('HandHero'),
-                  elevation: 0,
+            );
+          }
+
+          if (snapshot.connectionState == ConnectionState.done) {
+            if (snapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Text(
+                    'An error occurred: ${snapshot.error}',
+                    style: const TextStyle(color: Colors.red),
+                  ),
                 ),
-                Expanded(
-                  child: FutureBuilder(
-                    future: _fetchUserDataFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Container(
-                            height: MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
+              );
+            }
+
+            if (snapshot.hasData) {
+              return Scaffold(
+                drawer: _buildDrawer(),
+                body: Stack(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                        ),
+                      ),
+                      height: kToolbarHeight + 20,
+                    ),
+                    Column(
+                      children: [
+                        AppBar(
+                          backgroundColor: Colors.transparent,
+                          centerTitle: true,
+                          title: const Text('HandHero'),
+                          elevation: 0,
+                        ),
+                        Expanded(
+                          child: Container(
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                                colors: [
+                                  CustomTheme.mainColor2,
+                                  CustomTheme.mainColor,
+                                ],
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
                               ),
                             ),
-                            child: const Center(
-                                child: CircularProgressIndicator()));
-                      } else {
-                        return _buildContent();
-                      }
-                    },
-                  ),
+                            child: role == 'Patient'
+                                ? _buildContentForPatient()
+                                : _buildContentForDoctor(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              );
+            }
+          }
+          return Scaffold(
+            body: Center(
+              child: const Text('No data found.'),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -186,7 +373,7 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContentForPatient() {
     List<TrainingProgram> programs = getTrainingPrograms();
 
     return Container(
@@ -263,7 +450,8 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => const ProgressTrackingScreen(),
+                                      builder: (context) =>
+                                          const ProgressTrackingScreen(),
                                     ),
                                   );
                                 },
@@ -276,7 +464,8 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                   ),
                                   child: Center(
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.insert_chart,
                                             color: Colors.white, size: 40),
@@ -302,20 +491,22 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => const ProgressTrackingScreen(),
+                                      builder: (context) =>
+                                          const ProgressTrackingScreen(),
                                     ),
                                   );
                                 },
                                 child: Container(
-                                  margin:
-                                      const EdgeInsets.only(right: 8.0, top: 8.0),
+                                  margin: const EdgeInsets.only(
+                                      right: 8.0, top: 8.0),
                                   decoration: BoxDecoration(
                                     color: CustomTheme.accentColor4,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Center(
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.timer,
                                             color: Colors.white, size: 40),
@@ -348,7 +539,8 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => const ProgressTrackingScreen(),
+                                      builder: (context) =>
+                                          const ProgressTrackingScreen(),
                                     ),
                                   );
                                 },
@@ -361,19 +553,22 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                   ),
                                   child: Center(
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.bolt,
                                             color: Colors.blue[900], size: 30),
                                         Opacity(
                                           opacity: 0.3,
                                           child: Icon(Icons.bolt,
-                                              color: Colors.blue[900], size: 30),
+                                              color: Colors.blue[900],
+                                              size: 30),
                                         ),
                                         Opacity(
                                           opacity: 0.3,
                                           child: Icon(Icons.bolt,
-                                              color: Colors.blue[900], size: 30),
+                                              color: Colors.blue[900],
+                                              size: 30),
                                         ),
                                         Padding(
                                           padding:
@@ -410,7 +605,8 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => const ProgressTrackingScreen(),
+                                      builder: (context) =>
+                                          const ProgressTrackingScreen(),
                                     ),
                                   );
                                 },
@@ -423,7 +619,8 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                   ),
                                   child: Center(
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.bolt,
                                             color: Colors.blue[900], size: 30),
@@ -432,7 +629,8 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                         Opacity(
                                           opacity: 0.3,
                                           child: Icon(Icons.bolt,
-                                              color: Colors.blue[900], size: 30),
+                                              color: Colors.blue[900],
+                                              size: 30),
                                         ),
                                         Padding(
                                           padding:
@@ -467,20 +665,22 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => const ProgressTrackingScreen(),
+                                      builder: (context) =>
+                                          const ProgressTrackingScreen(),
                                     ),
                                   );
                                 },
                                 child: Container(
-                                  margin:
-                                      const EdgeInsets.only(left: 8.0, top: 8.0),
+                                  margin: const EdgeInsets.only(
+                                      left: 8.0, top: 8.0),
                                   decoration: BoxDecoration(
                                     color: CustomTheme.accentColor3,
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Center(
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(Icons.bolt,
                                             color: Colors.blue[900], size: 30),
@@ -649,6 +849,413 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                 ),
               ),
               Container(height: screenHeight * 0.02),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentForDoctor() {
+    return Container(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+      ),
+      child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Opacity(
+                          opacity: 0.7,
+                          child: Text(
+                            "Hello,",
+                            style: TextStyle(fontSize: 40, color: Colors.white),
+                          ),
+                        ),
+                        Text(
+                          name,
+                          style: const TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        ),
+                      ]),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        CustomTheme.accentColor4,
+                        CustomTheme.accentColor2
+                      ],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2), // Shadow color
+                        blurRadius: 20, // Blur radius
+                        offset: Offset(0, 0), // Offset of the shadow
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: TextFormField(
+                    controller: searchController,
+                    decoration: InputDecoration(
+                      labelText: 'Search patients...',
+                      prefixIcon: Icon(Icons.search, color: Colors.white),
+                      border: InputBorder.none,
+                      labelStyle: TextStyle(color: Colors.white),
+                    ),
+                    style: TextStyle(color: Colors.white),
+                    onChanged: (value) {
+                      _searchedString = value;
+                      _filterBySearchField(value);
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 15),
+                  decoration: BoxDecoration(
+                    color: CustomTheme.accentColor4,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ExpansionTile(
+                    backgroundColor: Colors.transparent,
+                    onExpansionChanged: (bool expanded) {
+                      setState(() {
+                        _isFilterTileExpended = expanded;
+                      });
+                    },
+                    title: const Text(
+                      'Filters',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: CustomTheme.accentColor4,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Text(
+                                    'Search by:',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        _buildSearchByButton('name', 'Name'),
+                                        _buildSearchByButton(
+                                            'rating', 'Rating'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                children: [
+                                  const Text(
+                                    'Order By:',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        _buildOrderByButton('name', 'Name'),
+                                        _buildOrderByButton('rating', 'Rating'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Container(
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          CustomTheme.accentColor4,
+                                          CustomTheme.accentColor2,
+                                        ],
+                                        begin: Alignment.centerLeft,
+                                        end: Alignment.centerRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          blurRadius: 20,
+                                          offset: Offset(0, 0),
+                                        ),
+                                      ],
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    child: ElevatedButton(
+                                      onPressed: () async {
+                                        searchController.clear();
+                                        filteredPatients = patients;
+                                        _applyFilters();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                        ),
+                                        elevation: 0, // Remove elevation
+                                      ),
+                                      child: const Text(
+                                        "Clear All",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors
+                                              .white, // Set text color to white
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          CustomTheme.accentColor4,
+                                          CustomTheme.accentColor2,
+                                        ],
+                                        begin: Alignment.centerLeft,
+                                        end: Alignment.centerRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          blurRadius: 20,
+                                          offset: Offset(0, 0),
+                                        ),
+                                      ],
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        //_applyFilters();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        primary: Colors.transparent,
+                                        shadowColor: Colors.transparent,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                        ),
+                                        elevation: 0, // Remove elevation
+                                      ),
+                                      child: const Text(
+                                        "Apply",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors
+                                              .white, // Set text color to white
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 50,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: filteredPatients.length,
+                  itemBuilder: (context, index) {
+                    final patient = filteredPatients[index];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 15),
+                      decoration: BoxDecoration(
+                        color: CustomTheme.accentColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ExpansionTile(
+                        backgroundColor: Colors.transparent,
+                        onExpansionChanged: (bool expanded) {
+                          setState(() {
+                            _isExpandedList[index] = expanded;
+                          });
+                        },
+                        title: Text(
+                          patient.name,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: CustomTheme.accentColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 15.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Email:',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    patient.email,
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 14),
+                                  ),
+                                  SizedBox(height: 8),
+                                  const Text(
+                                    'Email:',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    patient.email,
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 14),
+                                  ),
+                                  SizedBox(height: 8),
+                                  const Text(
+                                    'Email:',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    patient.email,
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 14),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Align(
+                                    alignment: Alignment.center,
+                                    child: Container(
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            CustomTheme.accentColor4,
+                                            CustomTheme.accentColor2,
+                                          ],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.2),
+                                            blurRadius: 20,
+                                            offset: Offset(0, 0),
+                                          ),
+                                        ],
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: () async {},
+                                        style: ElevatedButton.styleFrom(
+                                          primary: Colors.transparent,
+                                          shadowColor: Colors.transparent,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          elevation: 0, // Remove elevation
+                                        ),
+                                        child: const Text(
+                                          "Choose",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors
+                                                .white, // Set text color to white
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
             ],
           ),
         ),

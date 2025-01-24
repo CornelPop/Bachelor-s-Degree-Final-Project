@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/screens/RegisterScreen.dart';
 import 'package:hand_controller_app/AuthFeature/services/SharedPrefService.dart';
+import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/screens/TrainingProgramScreen.dart';
 
 import '../../GlobalThemeData.dart';
@@ -16,6 +18,7 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   final AuthService _authService = AuthService();
+  final UserService userService = UserService();
   final SharedPrefsService sharedPrefsService = SharedPrefsService();
 
   final TextEditingController _emailController = TextEditingController();
@@ -261,8 +264,10 @@ class _SignInScreenState extends State<SignInScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => TrainingProgramScreen()),
+                              builder: (context) => TrainingProgramScreen(),
+                            ),
                           );
+
                           sharedPrefsService.storeRememberMe(isChecked);
                         } else {
                           if (message != null) {

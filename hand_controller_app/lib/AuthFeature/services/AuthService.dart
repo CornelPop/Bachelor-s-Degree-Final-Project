@@ -44,19 +44,6 @@ class AuthService {
 
       final encryptedPassword = encrypted.encrypt(password, iv: iv).base64;
 
-      // await _firestore.collection('users').doc(userCredential.user!.uid).set({
-      //   'name': name,
-      //   'createdAt': Timestamp.now(),
-      //   'role': role,
-      //   'email': email,
-      //   'password': encryptedPassword,
-      //   'numberBeginnerExercises': 0,
-      //   'numberIntermediateExercises': 0,
-      //   'numberDifficultExercises': 0,
-      //   'timeSpentInWorkouts': 0,
-      //   'accuracyOfExercises': 0,
-      // });
-
       Map<String, dynamic> userMap;
 
       if (role == 'Doctor') {
@@ -113,11 +100,12 @@ class AuthService {
           'createdAt': Timestamp.now().toDate().toString(),
           'role': 'Patient',
           'email': googleUser.email,
+          'password': '',
           'numberBeginnerExercises': 0,
           'numberIntermediateExercises': 0,
           'numberDifficultExercises': 0,
           'timeSpentInWorkouts': 0,
-          'accuracyOfExercises': 0,
+          'accuracyOfExercises': 0.0,
           'doctorId': '',
         });
       }
