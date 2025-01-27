@@ -83,26 +83,6 @@ class UserService {
     }
   }
 
-  Future<List<Consultation>> getConsultations(String userId) async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-    try {
-      QuerySnapshot querySnapshot = await firestore
-          .collection('users')
-          .doc(userId)
-          .collection('consultations')
-          .get();
-
-      return querySnapshot.docs
-          .map(
-              (doc) => Consultation.fromMap(doc.data() as Map<String, dynamic>))
-          .toList();
-    } catch (e) {
-      print("Error getting consultations: $e");
-      return [];
-    }
-  }
-
   Future<List<dynamic>> getUsersByRole(String role) async {
     try {
       QuerySnapshot querySnapshot = await _firestore

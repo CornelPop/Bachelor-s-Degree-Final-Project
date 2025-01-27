@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/SharedPrefService.dart';
 import 'package:hand_controller_app/ProfileFeature/models/MedicalHistory.dart';
+import 'package:hand_controller_app/ProfileFeature/services/ConsultationService.dart';
 import 'package:hand_controller_app/ProfileFeature/services/RatingService.dart';
 import 'package:hand_controller_app/ProfileFeature/widgets/ProfileDashboardDrawer.dart';
 import 'package:hand_controller_app/ProfileFeature/widgets/ProfileDoctorContentWidget.dart';
@@ -22,6 +23,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
 
   final UserService userService = UserService();
+  final ConsultationService consultationService = ConsultationService();
   final AuthService authService = AuthService();
   final RatingService ratingService = RatingService();
 
@@ -48,7 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String? uid = await userService.getUserUid();
     if (uid != null) {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
-      List<Consultation> consultationsLocal = await userService.getConsultations(uid);
+      List<Consultation> consultationsLocal = await consultationService.getConsultations(uid);
       if (userData != null) {
 
         setState(() {

@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
 import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
 import 'package:hand_controller_app/ProgressTrackingFeature/screens/ProgressTrackingScreen.dart';
+import 'package:hand_controller_app/TrainingProgramsFeature/screens/EntireMedicalHistoryScreen.dart';
+import 'package:hand_controller_app/TrainingProgramsFeature/screens/EntireProgressTrackingScreen.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/widgets/TrainingProgramDashboardDrawer.dart';
 import '../../AlertDialogs/ExitDialogWidget.dart';
 import '../../AuthFeature/models/Patient.dart';
@@ -13,6 +15,7 @@ import '../../GlobalThemeData.dart';
 import '../models/MockDataTrainingPrograms.dart';
 import '../models/TrainingProgram.dart';
 import '../widgets/ProgramContainerWidget.dart';
+import 'package:lottie/lottie.dart';
 
 class TrainingProgramScreen extends StatefulWidget {
   const TrainingProgramScreen({Key? key}) : super(key: key);
@@ -198,18 +201,17 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
       if (userData != null) {
         if (userData['role'] as String == 'Patient') {
-
           setState(() {
             name = userData['name'] as String;
             email = userData['email'] as String;
             role = userData['role'] as String;
 
             numberBeginnerExercises =
-            userData['numberBeginnerExercises'] as int;
+                userData['numberBeginnerExercises'] as int;
             numberIntermediateExercises =
-            userData['numberIntermediateExercises'] as int;
+                userData['numberIntermediateExercises'] as int;
             numberDifficultExercises =
-            userData['numberDifficultExercises'] as int;
+                userData['numberDifficultExercises'] as int;
             timeSpentInWorkouts = userData['timeSpentInWorkouts'] as int;
             accuracyOfExercises = userData['accuracyOfExercises'] as double;
           });
@@ -218,14 +220,18 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
             'role': 'Patient',
             'name': userData['name'] as String,
             'email': userData['email'] as String,
-            'numberBeginnerExercises': userData['numberBeginnerExercises'] as int,
-            'numberIntermediateExercises': userData['numberIntermediateExercises'] as int,
-            'numberDifficultExercises': userData['numberDifficultExercises'] as int,
+            'numberBeginnerExercises':
+                userData['numberBeginnerExercises'] as int,
+            'numberIntermediateExercises':
+                userData['numberIntermediateExercises'] as int,
+            'numberDifficultExercises':
+                userData['numberDifficultExercises'] as int,
             'timeSpentInWorkouts': userData['timeSpentInWorkouts'] as int,
             'accuracyOfExercises': userData['accuracyOfExercises'] as double,
           };
         } else if (userData['role'] as String == 'Doctor') {
-          List<dynamic>? patientsLocal = await userService.getPatientsByDoctorId(uid);
+          List<dynamic>? patientsLocal =
+              await userService.getPatientsByDoctorId(uid);
 
           setState(() {
             name = userData['name'] as String;
@@ -254,7 +260,6 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
     }
     return null; // Return null if no data is found
   }
-
 
   @override
   void didChangeDependencies() {
@@ -311,7 +316,10 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                     Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                          colors: [
+                            CustomTheme.mainColor2,
+                            CustomTheme.mainColor
+                          ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
@@ -1196,51 +1204,114 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
                                         color: Colors.white, fontSize: 14),
                                   ),
                                   SizedBox(height: 8),
-                                  Align(
-                                    alignment: Alignment.center,
-                                    child: Container(
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        gradient: const LinearGradient(
-                                          colors: [
-                                            CustomTheme.accentColor4,
-                                            CustomTheme.accentColor2,
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Container(
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              CustomTheme.accentColor4,
+                                              CustomTheme.accentColor2,
+                                            ],
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.2),
+                                              blurRadius: 20,
+                                              offset: Offset(0, 0),
+                                            ),
                                           ],
-                                          begin: Alignment.centerLeft,
-                                          end: Alignment.centerRight,
+                                          borderRadius:
+                                              BorderRadius.circular(30),
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color:
-                                                Colors.black.withOpacity(0.2),
-                                            blurRadius: 20,
-                                            offset: Offset(0, 0),
+                                        child: ElevatedButton(
+                                          onPressed: () async {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    EntireMedicalHistoryScreen(
+                                                        patient: patient),
+                                              ),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            primary: Colors.transparent,
+                                            shadowColor: Colors.transparent,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
+                                            ),
+                                            elevation: 0, // Remove elevation
                                           ),
-                                        ],
-                                        borderRadius: BorderRadius.circular(30),
+                                          child: const Text(
+                                            " Medical History ",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors
+                                                  .white, // Set text color to white
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                      child: ElevatedButton(
-                                        onPressed: () async {},
-                                        style: ElevatedButton.styleFrom(
-                                          primary: Colors.transparent,
-                                          shadowColor: Colors.transparent,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(30),
+                                      Container(
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              CustomTheme.accentColor4,
+                                              CustomTheme.accentColor2,
+                                            ],
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
                                           ),
-                                          elevation: 0, // Remove elevation
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.2),
+                                              blurRadius: 20,
+                                              offset: Offset(0, 0),
+                                            ),
+                                          ],
+                                          borderRadius:
+                                              BorderRadius.circular(30),
                                         ),
-                                        child: const Text(
-                                          "Choose",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors
-                                                .white, // Set text color to white
+                                        child: ElevatedButton(
+                                          onPressed: () async {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      EntireProgressTrackingScreen(
+                                                          patient: patient)),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            primary: Colors.transparent,
+                                            shadowColor: Colors.transparent,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
+                                            ),
+                                            elevation: 0, // Remove elevation
+                                          ),
+                                          child: const Text(
+                                            "Training Progress",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors
+                                                  .white, // Set text color to white
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                   SizedBox(height: 8),
                                 ],
@@ -1256,10 +1327,95 @@ class _TrainingProgramScreenState extends State<TrainingProgramScreen> {
               SizedBox(
                 height: 20,
               ),
+              ElevatedButton(
+                  onPressed: () async {
+                    showGloveRemovedDialog(context);
+                  },
+                  child: Text('press'))
             ],
           ),
         ),
       ),
     );
   }
+  void showGloveRemovedDialog(BuildContext context) {
+    // Create a ValueNotifier to manage glove status dynamically
+    ValueNotifier<bool> isGloveOnNotifier = ValueNotifier(false);  // Default to glove off
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Center(
+                child: Text("Ooops, something is wrong"),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Lottie.asset(
+                    'assets/animations/glove_removed.json',
+                    width: 300,
+                    height: 300,
+                    repeat: true,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "The glove has been removed. Please put it back to continue.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 20),
+                  // Buttons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Exit button
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Exit"),
+                      ),
+                      // Continue button (disabled if glove is off)
+                      ValueListenableBuilder<bool>(
+                        valueListenable: isGloveOnNotifier,
+                        builder: (context, isGloveOn, child) {
+                          return ElevatedButton(
+                            onPressed: isGloveOn
+                                ? () {
+                              Navigator.pop(context);
+                            }
+                                : null, // Disabled if glove is not on
+                            style: ElevatedButton.styleFrom(
+                              primary: isGloveOn
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey,
+                            ),
+                            child: const Text("Continue"),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    Future.delayed(Duration(seconds: 5), () {
+      isGloveOnNotifier.value = true;
+    });
+  }
+
+
 }
