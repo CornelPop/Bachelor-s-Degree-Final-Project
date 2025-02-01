@@ -1,33 +1,45 @@
 import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:hand_controller_app/AuthFeature/screens/ProfileCompletionScreen.dart';
+import 'package:hand_controller_app/AlertDialogs/AttentionDialogWidget.dart';
 import 'package:hand_controller_app/AuthFeature/services/AuthService.dart';
 import 'package:hand_controller_app/AlertDialogs/ErrorDialogWidget.dart';
+import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
 
 import '../../GlobalThemeData.dart';
 import 'SignInScreen.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class ProfileCompletionScreen extends StatefulWidget {
+  final String name;
+  final String email;
+  final String password;
+  final String role;
+
+  const ProfileCompletionScreen(
+      {super.key,
+      required this.name,
+      required this.email,
+      required this.password,
+      required this.role});
 
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  _ProfileCompletionScreenState createState() =>
+      _ProfileCompletionScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _ProfileCompletionScreenState extends State<ProfileCompletionScreen> {
   final AuthService _authService = AuthService();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
+  final UserService _userService = UserService();
+
+  final TextEditingController _specializationController =
+      TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _dateOfBirthController = TextEditingController();
+  final TextEditingController _maxNoOfPatientsController =
       TextEditingController();
 
   String? _message;
-  String? _role;
-  bool showPass = false;
-  bool showConfirmPass = false;
-  bool isPatientOptionChosen = false;
+  String? _gender;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      'Create an account',
+                      'Finish your profile',
                       style: TextStyle(
                         fontSize: 35,
                         fontWeight: FontWeight.bold,
@@ -75,37 +87,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            CustomTheme.accentColor4,
-                            CustomTheme.accentColor2
-                          ],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            // Shadow color
-                            blurRadius: 20,
-                            // Blur radius
-                            offset: Offset(0, 0), // Offset of the shadow
+                    InkWell(
+                      onTap: () async {
+                        _selectDate(context);
+                      },
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              CustomTheme.accentColor4,
+                              CustomTheme.accentColor2
+                            ],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
                           ),
-                        ],
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: TextFormField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
-                          prefixIcon: Icon(Icons.person, color: Colors.white),
-                          labelStyle: TextStyle(color: Colors.white),
-                          border: InputBorder.none,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              // Shadow color
+                              blurRadius: 20,
+                              // Blur radius
+                              offset: Offset(0, 0), // Offset of the shadow
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                        style: TextStyle(color: Colors.white),
+                        child: TextFormField(
+                          enabled: false,
+                          readOnly: true,
+                          controller: _dateOfBirthController,
+                          decoration: const InputDecoration(
+                            labelText: 'Date of Birth',
+                            prefixIcon:
+                                Icon(Icons.calendar_month, color: Colors.white),
+                            labelStyle: TextStyle(color: Colors.white),
+                            border: InputBorder.none,
+                          ),
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -132,113 +152,95 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                       child: TextFormField(
-                        controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.mail, color: Colors.white),
-                          labelStyle: TextStyle(color: Colors.white),
-                          border: InputBorder.none,
-                        ),
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            CustomTheme.accentColor4,
-                            CustomTheme.accentColor2
-                          ],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            // Shadow color
-                            blurRadius: 20,
-                            // Blur radius
-                            offset: Offset(0, 0), // Offset of the shadow
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: TextFormField(
-                        controller: _passwordController,
+                        keyboardType: TextInputType.number,
+                        controller: _phoneNumberController,
                         decoration: InputDecoration(
-                          labelText: 'Password',
-                          prefixIcon: Icon(Icons.lock, color: Colors.white),
+                          labelText: 'Phone Number',
+                          prefixIcon: Icon(Icons.phone, color: Colors.white),
                           labelStyle: TextStyle(color: Colors.white),
-                          suffixIcon: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                showPass = !showPass;
-                              });
-                            },
-                            child: showPass
-                                ? Icon(Icons.disabled_visible_rounded,
-                                    color: Colors.white)
-                                : Icon(Icons.remove_red_eye_rounded,
-                                    color: Colors.white),
-                          ),
                           border: InputBorder.none,
                         ),
-                        obscureText: !showPass,
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            CustomTheme.accentColor4,
-                            CustomTheme.accentColor2
-                          ],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            // Shadow color
-                            blurRadius: 20,
-                            // Blur radius
-                            offset: Offset(0, 0), // Offset of the shadow
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: TextFormField(
-                        controller: _confirmPasswordController,
-                        decoration: InputDecoration(
-                          labelText: 'Confirm Password',
-                          prefixIcon: Icon(Icons.lock, color: Colors.white),
-                          labelStyle: TextStyle(color: Colors.white),
-                          suffixIcon: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                showConfirmPass = !showConfirmPass;
-                              });
-                            },
-                            child: showConfirmPass
-                                ? Icon(Icons.disabled_visible_rounded,
-                                    color: Colors.white)
-                                : Icon(Icons.remove_red_eye_rounded,
-                                    color: Colors.white),
-                          ),
-                          border: InputBorder.none,
-                        ),
-                        obscureText: !showConfirmPass,
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
+                    widget.role != 'Patient'
+                        ? Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  CustomTheme.accentColor4,
+                                  CustomTheme.accentColor2
+                                ],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  // Shadow color
+                                  blurRadius: 20,
+                                  // Blur radius
+                                  offset: Offset(0, 0), // Offset of the shadow
+                                ),
+                              ],
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: TextFormField(
+                              controller: _specializationController,
+                              decoration: InputDecoration(
+                                labelText: 'Specialization',
+                                prefixIcon:
+                                    Icon(Icons.work, color: Colors.white),
+                                labelStyle: TextStyle(color: Colors.white),
+                                border: InputBorder.none,
+                              ),
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          )
+                        : Container(),
+                    const SizedBox(height: 10),
+                    widget.role != 'Patient'
+                        ? Container(
+                            height: 50,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  CustomTheme.accentColor4,
+                                  CustomTheme.accentColor2
+                                ],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  // Shadow color
+                                  blurRadius: 20,
+                                  // Blur radiu
+                                  offset: Offset(0, 0), // Offset of the shadow
+                                ),
+                              ],
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: TextFormField(
+                              keyboardType: TextInputType.number,
+                              controller: _maxNoOfPatientsController,
+                              decoration: InputDecoration(
+                                labelText: 'Maximum number of patients',
+                                prefixIcon:
+                                    Icon(Icons.add, color: Colors.white),
+                                labelStyle: TextStyle(color: Colors.white),
+                                border: InputBorder.none,
+                              ),
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          )
+                        : Container(),
+                    const SizedBox(height: 10),
                     const Text(
-                      "Choose you title from the options below:",
+                      "Choose you gender from the options below:",
                       style: TextStyle(color: Colors.white),
                     ),
                     const SizedBox(
@@ -272,31 +274,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: Padding(
                               padding: const EdgeInsets.only(right: 0.0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      isPatientOptionChosen = true;
                                       setState(() {
-                                        _role = 'Patient';
+                                        _gender = 'Male';
+                                        print('male');
                                       });
                                     },
                                     child: Container(
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 20, vertical: 10),
                                       decoration: BoxDecoration(
-                                        color: _role == 'Patient'
+                                        color: _gender == 'Male'
                                             ? CustomTheme.accentColor2
                                             : Colors.transparent,
                                         borderRadius: BorderRadius.circular(30),
                                         border: Border.all(
-                                          color: _role == 'Patient'
+                                          color: _gender == 'Male'
                                               ? Colors.white
                                               : Colors.transparent,
                                         ),
                                       ),
                                       child: Text(
-                                        'Patient',
+                                        ' Male ',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -304,29 +307,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       ),
                                     ),
                                   ),
-
                                   GestureDetector(
                                     onTap: () {
                                       setState(() {
-                                        _role = 'Therapist';
+                                        _gender = 'Female';
                                       });
                                     },
                                     child: Container(
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 20, vertical: 10),
                                       decoration: BoxDecoration(
-                                        color: _role == 'Therapist'
+                                        color: _gender == 'Female'
                                             ? CustomTheme.accentColor4
                                             : Colors.transparent,
                                         borderRadius: BorderRadius.circular(30),
                                         border: Border.all(
-                                          color: _role == 'Therapist'
+                                          color: _gender == 'Female'
                                               ? Colors.white
                                               : Colors.transparent,
                                         ),
                                       ),
                                       child: Text(
-                                        'Therapist',
+                                        'Female',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -336,27 +338,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                   GestureDetector(
                                     onTap: () {
-                                      isPatientOptionChosen = false;
                                       setState(() {
-                                        _role = 'Doctor';
+                                        _gender = 'Other';
                                       });
                                     },
                                     child: Container(
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 20, vertical: 10),
                                       decoration: BoxDecoration(
-                                        color: _role == 'Doctor'
+                                        color: _gender == 'Other'
                                             ? CustomTheme.accentColor3
                                             : Colors.transparent,
                                         borderRadius: BorderRadius.circular(30),
                                         border: Border.all(
-                                          color: _role == 'Doctor'
+                                          color: _gender == 'Other'
                                               ? Colors.white
                                               : Colors.transparent,
                                         ),
                                       ),
                                       child: Text(
-                                        'Doctor',
+                                        'Other',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -371,7 +372,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 40),
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -399,35 +400,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: () async {
                           String errors = '';
 
-                          if (_emailController.text.isEmpty) {
-                            errors += 'Please enter your email.\n';
-                          } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                              .hasMatch(_emailController.text)) {
-                            errors += 'Please enter a valid email.\n';
+                          if (widget.role != 'Patient') {
+                            if (_specializationController.text.isEmpty) {
+                              errors += 'Please enter your gender.\n';
+                            }
+
+                            if (_maxNoOfPatientsController.text.isEmpty) {
+                              errors += 'Please enter your max number of patients.\n';
+                            }
                           }
 
-                          if (_passwordController.text.isEmpty) {
-                            errors += 'Please enter your password.\n';
-                          } else if (_passwordController.text.length < 6) {
-                            errors +=
-                                'Password must be at least 6 characters long.\n';
+                          if (_phoneNumberController.text.isEmpty) {
+                            errors += 'Please enter your phoneNumber.\n';
                           }
 
-                          if (_confirmPasswordController.text.isEmpty) {
-                            errors += 'Please confirm your password.\n';
-                          } else if (_passwordController.text
-                                  .compareTo(_confirmPasswordController.text) !=
-                              0) {
-                            errors +=
-                                'Password and Confirm Password fields are not matched.\n';
+                          if (_dateOfBirthController.text.isEmpty) {
+                            errors += 'Please enter your date of birth.\n';
                           }
 
-                          if (_nameController.text.isEmpty) {
-                            errors += 'Please enter your name.\n';
-                          }
-
-                          if (_role == null) {
-                            errors += 'Please select a role.\n';
+                          if (_gender == null) {
+                            errors += 'Please select a gender.\n';
                           }
 
                           if (errors.isNotEmpty) {
@@ -435,17 +427,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 .showErrorDialog(context);
                             return;
                           } else {
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute(
-                                  builder: (context) => ProfileCompletionScreen(
-                                    email: _emailController.text,
-                                    password: _passwordController.text,
-                                    name: _nameController.text,
-                                    role: _role!,)),
-                                  (Route<dynamic> route) => false,
-                            );
-                          }
+                            final message = await _authService.register(
+                                widget.email,
+                                widget.password,
+                                widget.name,
+                                widget.role,
+                                _dateOfBirthController.text,
+                                _phoneNumberController.text,
+                                _gender!);
 
+                            if (message != null && !message.startsWith('E')) {
+                              if (widget.role != 'Patient') {
+                                await _userService.updateUserFields(message, {
+                                  'specialization':
+                                      _specializationController.text,
+                                  'maxNoOfPatients':
+                                      _maxNoOfPatientsController.text,
+                                });
+                              }
+
+                              Navigator.of(context).pushAndRemoveUntil(
+                                MaterialPageRoute(
+                                    builder: (context) => SignInScreen()),
+                                (Route<dynamic> route) => false,
+                              );
+                            } else {
+                              ErrorDialogWidget(
+                                      message: message ?? 'Unknown error')
+                                  .showErrorDialog(context);
+                            }
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           shadowColor: Colors.transparent,
@@ -456,7 +467,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           elevation: 0,
                         ),
                         child: const Text(
-                          'Continue',
+                          'Finish',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -471,19 +482,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            "Already have an account?",
+                            "You want to do this later?",
                             style: TextStyle(color: Colors.white),
                           ),
                           SizedBox(
                             width: 10,
                           ),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                    builder: (context) => SignInScreen()),
-                                (Route<dynamic> route) => false,
-                              );
+                            onTap: () async {
+                              bool buttonPressed = await AttentionDialog.showExitDialog(context);
+                              if (buttonPressed) { print('ajunge');
+                                final message = await _authService.register(
+                                    widget.email,
+                                    widget.password,
+                                    widget.name,
+                                    widget.role,
+                                    '', '', '');
+
+                                if (message != null && !message.startsWith('E')) {
+                                  if (widget.role != 'Patient') {
+                                    await _userService.updateUserFields(message, {
+                                      'specialization': '',
+                                      'maxNoOfPatients': ''
+                                    });
+                                  }
+
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                        builder: (context) => SignInScreen()),
+                                        (Route<dynamic> route) => false,
+                                  );
+                                } else {
+                                  ErrorDialogWidget(
+                                      message: message ?? 'Unknown error')
+                                      .showErrorDialog(context);
+                                }
+                              }
                             },
                             child: const Text(
                               'Sign in!',
@@ -511,5 +545,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2101),
+    );
+
+    if (pickedDate != null) {
+      final DateTime selectedDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+      );
+
+      setState(() {
+        _dateOfBirthController.text = selectedDateTime.toString();
+      });
+    }
   }
 }

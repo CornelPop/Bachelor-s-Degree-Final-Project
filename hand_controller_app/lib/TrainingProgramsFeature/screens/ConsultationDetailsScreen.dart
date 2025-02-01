@@ -20,9 +20,14 @@ class ConsultationDetailsScreen extends StatefulWidget {
   final String doctorId;
   final Patient patient;
   final bool create;
+  final Consultation consultation;
 
   const ConsultationDetailsScreen(
-      {super.key, required this.patient, required this.doctorId, required this.create});
+      {super.key,
+      required this.patient,
+      required this.doctorId,
+      required this.create,
+      required this.consultation});
 
   @override
   _ConsultationDetailsScreenState createState() =>
@@ -32,8 +37,6 @@ class ConsultationDetailsScreen extends StatefulWidget {
 class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
   final ConsultationService consultationService = ConsultationService();
 
-  DateTime? _selectedDate;
-
   final TextEditingController dateController = TextEditingController();
   final TextEditingController titleController = TextEditingController();
   final TextEditingController treatmentPlanController = TextEditingController();
@@ -42,6 +45,13 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.create == false) {
+      dateController.text = widget.consultation.date;
+      titleController.text = widget.consultation.title;
+      treatmentPlanController.text = widget.consultation.treatmentPlan;
+      notesController.text = widget.consultation.notes;
+    }
   }
 
   @override
@@ -91,15 +101,26 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 15.0),
                           child: Column(
                             children: [
-                              SizedBox(height: 20,),
-                              const Text(
-                                'Create consultation',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                  color: CustomTheme.secondaryColor,
-                                ),
+                              SizedBox(
+                                height: 20,
                               ),
+                              widget.create == true
+                                  ? const Text(
+                                      'Create consultation',
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        color: CustomTheme.secondaryColor,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Edit consultation',
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold,
+                                        color: CustomTheme.secondaryColor,
+                                      ),
+                                    ),
                               SizedBox(height: 30),
                               Container(
                                 height: 50,
@@ -114,9 +135,12 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.2), // Shadow color
-                                      blurRadius: 20, // Blur radius
-                                      offset: Offset(0, 0), // Offset of the shadow
+                                      color: Colors.black.withOpacity(0.2),
+                                      // Shadow color
+                                      blurRadius: 20,
+                                      // Blur radius
+                                      offset:
+                                          Offset(0, 0), // Offset of the shadow
                                     ),
                                   ],
                                   borderRadius: BorderRadius.circular(30),
@@ -125,7 +149,8 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   enabled: false,
                                   decoration: InputDecoration(
                                     labelText: widget.patient.name,
-                                    prefixIcon: Icon(Icons.account_circle, color: Colors.white),
+                                    prefixIcon: Icon(Icons.account_circle,
+                                        color: Colors.white),
                                     border: InputBorder.none,
                                     labelStyle: TextStyle(color: Colors.white),
                                   ),
@@ -134,8 +159,8 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                               ),
                               SizedBox(height: 20),
                               InkWell(
-                                onTap: () {
-                                  _selectDate(context);
+                                onTap: () async {
+                                  _selectDateAndTime(context);
                                 },
                                 child: Container(
                                   height: 50,
@@ -150,21 +175,27 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.2), // Shadow color
-                                        blurRadius: 20, // Blur radius
-                                        offset: Offset(0, 0), // Offset of the shadow
+                                        color: Colors.black.withOpacity(0.2),
+                                        // Shadow color
+                                        blurRadius: 20,
+                                        // Blur radius
+                                        offset: Offset(
+                                            0, 0), // Offset of the shadow
                                       ),
                                     ],
                                     borderRadius: BorderRadius.circular(30),
                                   ),
                                   child: TextFormField(
                                     enabled: false,
+                                    readOnly: true,
                                     controller: dateController,
                                     decoration: InputDecoration(
-                                      labelText: 'Date',
-                                      prefixIcon: Icon(Icons.calendar_month, color: Colors.white),
+                                      labelText: 'Date and time',
+                                      prefixIcon: Icon(Icons.calendar_month,
+                                          color: Colors.white),
                                       border: InputBorder.none,
-                                      labelStyle: TextStyle(color: Colors.white),
+                                      labelStyle:
+                                          TextStyle(color: Colors.white),
                                     ),
                                     style: TextStyle(color: Colors.white),
                                   ),
@@ -184,9 +215,12 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.2), // Shadow color
-                                      blurRadius: 20, // Blur radius
-                                      offset: Offset(0, 0), // Offset of the shadow
+                                      color: Colors.black.withOpacity(0.2),
+                                      // Shadow color
+                                      blurRadius: 20,
+                                      // Blur radius
+                                      offset:
+                                          Offset(0, 0), // Offset of the shadow
                                     ),
                                   ],
                                   borderRadius: BorderRadius.circular(30),
@@ -195,7 +229,8 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   controller: titleController,
                                   decoration: InputDecoration(
                                     labelText: 'Title',
-                                    prefixIcon: Icon(Icons.title, color: Colors.white),
+                                    prefixIcon:
+                                        Icon(Icons.title, color: Colors.white),
                                     border: InputBorder.none,
                                     labelStyle: TextStyle(color: Colors.white),
                                   ),
@@ -216,9 +251,12 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.2), // Shadow color
-                                      blurRadius: 20, // Blur radius
-                                      offset: Offset(0, 0), // Offset of the shadow
+                                      color: Colors.black.withOpacity(0.2),
+                                      // Shadow color
+                                      blurRadius: 20,
+                                      // Blur radius
+                                      offset:
+                                          Offset(0, 0), // Offset of the shadow
                                     ),
                                   ],
                                   borderRadius: BorderRadius.circular(30),
@@ -228,7 +266,8 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   controller: treatmentPlanController,
                                   decoration: InputDecoration(
                                     labelText: 'Treatment plan',
-                                    prefixIcon: Icon(Icons.content_paste, color: Colors.white),
+                                    prefixIcon: Icon(Icons.content_paste,
+                                        color: Colors.white),
                                     border: InputBorder.none,
                                     labelStyle: TextStyle(color: Colors.white),
                                   ),
@@ -249,9 +288,12 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.2), // Shadow color
-                                      blurRadius: 20, // Blur radius
-                                      offset: Offset(0, 0), // Offset of the shadow
+                                      color: Colors.black.withOpacity(0.2),
+                                      // Shadow color
+                                      blurRadius: 20,
+                                      // Blur radius
+                                      offset:
+                                          Offset(0, 0), // Offset of the shadow
                                     ),
                                   ],
                                   borderRadius: BorderRadius.circular(30),
@@ -261,14 +303,17 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   controller: notesController,
                                   decoration: InputDecoration(
                                     labelText: 'Notes',
-                                    prefixIcon: Icon(Icons.notes, color: Colors.white),
+                                    prefixIcon:
+                                        Icon(Icons.notes, color: Colors.white),
                                     border: InputBorder.none,
                                     labelStyle: TextStyle(color: Colors.white),
                                   ),
                                   style: TextStyle(color: Colors.white),
                                 ),
                               ),
-                              SizedBox(height: 40,),
+                              SizedBox(
+                                height: 40,
+                              ),
                               Container(
                                 height: 50,
                                 decoration: BoxDecoration(
@@ -282,9 +327,12 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.2), // Shadow color
-                                      blurRadius: 20, // Blur radius
-                                      offset: Offset(0, 0), // Offset of the shadow
+                                      color: Colors.black.withOpacity(0.2),
+                                      // Shadow color
+                                      blurRadius: 20,
+                                      // Blur radius
+                                      offset:
+                                          Offset(0, 0), // Offset of the shadow
                                     ),
                                   ],
                                   borderRadius: BorderRadius.circular(30),
@@ -304,7 +352,8 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                     }
 
                                     if (treatmentPlanController.text.isEmpty) {
-                                      errors += 'Please enter a Treatment Plan\n';
+                                      errors +=
+                                          'Please enter a Treatment Plan\n';
                                     }
 
                                     if (notesController.text.isEmpty) {
@@ -316,21 +365,34 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                           .showErrorDialog(context);
                                       return;
                                     } else {
-
-                                      consultationService.addConsultation(Consultation(consultationId: '',
-                                          doctorId: widget.doctorId,
-                                          patientId: widget.patient.uid,
-                                          date: dateController.text,
-                                          title: titleController.text,
-                                          notes: notesController.text,
-                                          treatmentPlan: treatmentPlanController.text));
+                                      if (widget.create == true) {
+                                        consultationService.addConsultation(
+                                            Consultation(
+                                                consultationId: '',
+                                                doctorId: widget.doctorId,
+                                                patientId: widget.patient.uid,
+                                                date: dateController.text,
+                                                title: titleController.text,
+                                                notes: notesController.text,
+                                                treatmentPlan:
+                                                    treatmentPlanController
+                                                        .text));
+                                      } else {
+                                        widget.consultation.title = titleController.text;
+                                        widget.consultation.date = dateController.text;
+                                        widget.consultation.treatmentPlan = treatmentPlanController.text;
+                                        widget.consultation.notes = notesController.text;
+                                        consultationService.updateConsultation(widget.consultation);
+                                      }
                                     }
 
                                     Navigator.pop(context);
                                     Navigator.pop(context);
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (context) => EntireMedicalHistoryScreen(patient: widget.patient),
+                                        builder: (context) =>
+                                            EntireMedicalHistoryScreen(
+                                                patient: widget.patient),
                                       ),
                                     );
                                   },
@@ -352,13 +414,13 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 30,),
+                              SizedBox(
+                                height: 30,
+                              ),
                             ],
                           ),
                         ),
-                      )
-                  )
-              ),
+                      ))),
             ],
           ),
         ],
@@ -366,19 +428,33 @@ class _ConsultationDetailsScreenState extends State<ConsultationDetailsScreen> {
     );
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _selectDateAndTime(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
     );
 
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-        dateController.text = '${_selectedDate!.toLocal()}'.split(' ')[0];
-      });
+    if (pickedDate != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+      if (pickedTime != null) {
+        final DateTime selectedDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        setState(() {
+          dateController.text = selectedDateTime.toString();
+        });
+      }
     }
   }
 }

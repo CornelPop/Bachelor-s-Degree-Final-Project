@@ -54,7 +54,7 @@ class _ProfileDoctorContentWidgetState extends State<ProfileDoctorContentWidget>
             ),
             const SizedBox(height: 5),
             Text(
-              'Patient',
+              'Doctor',
               style: const TextStyle(fontSize: 16, color: Colors.white70),
             ),
             const SizedBox(height: 20),

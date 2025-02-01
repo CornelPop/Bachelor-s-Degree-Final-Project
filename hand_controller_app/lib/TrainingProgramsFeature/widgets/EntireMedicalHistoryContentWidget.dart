@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:hand_controller_app/AuthFeature/screens/ShowAllDoctorsOrTherapistsScreen.dart';
+import 'package:hand_controller_app/ProfileFeature/screens/ShowAllDoctorsOrTherapistsScreen.dart';
 import 'package:hand_controller_app/ProfileFeature/models/Rating.dart';
 import 'package:hand_controller_app/ProfileFeature/screens/ProfileScreen.dart';
+import 'package:hand_controller_app/ProfileFeature/services/ConsultationService.dart';
 import 'package:hand_controller_app/ProfileFeature/services/PdfProfileService.dart';
 import 'package:hand_controller_app/ProfileFeature/services/RatingService.dart';
 import 'package:hand_controller_app/ProfileFeature/widgets/DoneMedicalHistoryContainer.dart';
 import 'package:hand_controller_app/TrainingProgramsFeature/screens/ConsultationDetailsScreen.dart';
+import 'package:hand_controller_app/TrainingProgramsFeature/screens/EntireMedicalHistoryScreen.dart';
 import '../../AuthFeature/models/Patient.dart';
 import '../../AuthFeature/services/AuthService.dart';
 
@@ -32,8 +34,7 @@ class EntireMedicalHistoryContentWidget extends StatefulWidget {
 class _EntireMedicalHistoryContentWidgetState
     extends State<EntireMedicalHistoryContentWidget> {
   final PdfProfileService pdfProfileService = PdfProfileService();
-  final RatingService ratingService = RatingService();
-
+  final ConsultationService consultationService = ConsultationService();
   List<bool> _isExpandedList = [];
 
   @override
@@ -173,14 +174,24 @@ class _EntireMedicalHistoryContentWidgetState
                         child: ElevatedButton(
                           onPressed: () async {
                             Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ConsultationDetailsScreen(
-                              patient: widget.patient,
-                              doctorId: widget.userId,  // Ensure the variable name is correct here
-                              create: true,  // or the appropriate value
-                            ))
-                            );                          },
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        ConsultationDetailsScreen(
+                                          patient: widget.patient,
+                                          doctorId: widget.userId,
+                                          consultation: Consultation(
+                                            patientId: 'dummy_patient_id',
+                                            doctorId: widget.userId,
+                                            title: '',
+                                            consultationId: '',
+                                            treatmentPlan: '',
+                                            notes: '',
+                                            date: '',
+                                          ),
+                                          create: true,
+                                        )));
+                          },
                           style: ElevatedButton.styleFrom(
                             primary: Colors.transparent,
                             shadowColor: Colors.transparent,
@@ -229,7 +240,7 @@ class _EntireMedicalHistoryContentWidgetState
                             },
                             title: Text(
                               consultation.title,
-                              style: TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Colors.white),
                             ),
                             children: [
                               Container(
@@ -245,7 +256,7 @@ class _EntireMedicalHistoryContentWidgetState
                                         CrossAxisAlignment.start,
                                     children: [
                                       const Text(
-                                        'Date:',
+                                        'Date and time:',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 14,
@@ -286,57 +297,154 @@ class _EntireMedicalHistoryContentWidgetState
                                             color: Colors.white, fontSize: 14),
                                       ),
                                       SizedBox(height: 8),
-                                      Align(
-                                        alignment: Alignment.center,
-                                        child: Container(
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            gradient: const LinearGradient(
-                                              colors: [
-                                                CustomTheme.accentColor4,
-                                                CustomTheme.accentColor2,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Container(
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(
+                                                colors: [
+                                                  CustomTheme.accentColor4,
+                                                  CustomTheme.accentColor2,
+                                                ],
+                                                begin: Alignment.centerLeft,
+                                                end: Alignment.centerRight,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.2),
+                                                  blurRadius: 20,
+                                                  offset: Offset(0, 0),
+                                                ),
                                               ],
-                                              begin: Alignment.centerLeft,
-                                              end: Alignment.centerRight,
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
                                             ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.2),
-                                                blurRadius: 20,
-                                                offset: Offset(0, 0),
-                                              ),
-                                            ],
-                                            borderRadius:
-                                                BorderRadius.circular(30),
+                                            child: ElevatedButton(
+                                                onPressed: () async {
+                                                  pdfProfileService
+                                                      .generateAndSavePDFSpecificConsultation(
+                                                    widget.patient.name,
+                                                    consultation,
+                                                  );
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  primary: Colors.transparent,
+                                                  shadowColor:
+                                                      Colors.transparent,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  elevation:
+                                                      0, // Remove elevation
+                                                ),
+                                                child:
+                                                    const Icon(Icons.download)),
                                           ),
-                                          child: ElevatedButton(
-                                            onPressed: () async {
-                                              pdfProfileService
-                                                  .generateAndSavePDFSpecificConsultation(
-                                                widget.patient.name,
-                                                consultation,
-                                              );
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              primary: Colors.transparent,
-                                              shadowColor: Colors.transparent,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(30),
+                                          Container(
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(
+                                                colors: [
+                                                  CustomTheme.accentColor4,
+                                                  CustomTheme.accentColor2,
+                                                ],
+                                                begin: Alignment.centerLeft,
+                                                end: Alignment.centerRight,
                                               ),
-                                              elevation: 0, // Remove elevation
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.2),
+                                                  blurRadius: 20,
+                                                  offset: Offset(0, 0),
+                                                ),
+                                              ],
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
                                             ),
-                                            child: const Text(
-                                              "Download Consultation",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.white,
-                                              ),
-                                            ),
+                                            child: ElevatedButton(
+                                                onPressed: () async {
+                                                  Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              ConsultationDetailsScreen(
+                                                                patient: widget
+                                                                    .patient,
+                                                                doctorId: widget
+                                                                    .userId,
+                                                                create: false,
+                                                                consultation: consultation,
+                                                              )));
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  primary: Colors.transparent,
+                                                  shadowColor:
+                                                      Colors.transparent,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  elevation:
+                                                      0, // Remove elevation
+                                                ),
+                                                child: const Icon(Icons.edit)),
                                           ),
-                                        ),
+                                          Container(
+                                            height: 50,
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(
+                                                colors: [
+                                                  CustomTheme.accentColor4,
+                                                  CustomTheme.accentColor2,
+                                                ],
+                                                begin: Alignment.centerLeft,
+                                                end: Alignment.centerRight,
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.2),
+                                                  blurRadius: 20,
+                                                  offset: Offset(0, 0),
+                                                ),
+                                              ],
+                                              borderRadius:
+                                                  BorderRadius.circular(30),
+                                            ),
+                                            child: ElevatedButton(
+                                                onPressed: () async {
+                                                  consultationService
+                                                      .deleteConsultation(
+                                                          consultation.consultationId);
+                                                  setState(() {
+                                                    widget.consultations
+                                                        .remove(consultation);
+                                                  });
+                                                },
+                                                style: ElevatedButton.styleFrom(
+                                                  primary: Colors.transparent,
+                                                  shadowColor:
+                                                      Colors.transparent,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  elevation:
+                                                      0, // Remove elevation
+                                                ),
+                                                child:
+                                                    const Icon(Icons.delete)),
+                                          ),
+                                        ],
                                       ),
                                       SizedBox(height: 10),
                                     ],

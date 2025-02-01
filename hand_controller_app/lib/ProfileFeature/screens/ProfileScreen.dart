@@ -35,6 +35,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String assignedDoctorId = '';
   String assignedDoctorName = '';
   String assignedDoctorEmail = '';
+  String assignedDoctorPhoneNumber = '';
+  String assignedDoctorSpecialization = '';
   List<Consultation> consultations = [];
   List<Rating> ratings = [];
 
@@ -50,8 +52,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     String? uid = await userService.getUserUid();
     if (uid != null) {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
-      List<Consultation> consultationsLocal = await consultationService.getConsultations(uid);
       if (userData != null) {
+
+        List<Consultation> consultationsLocal = await consultationService.getConsultationsByPatientIdAndDoctorId(uid, userData['doctorId'] as String);
 
         setState(() {
           userId = uid;
@@ -63,11 +66,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
 
         Map<String, dynamic>? assignedDoctorData = await userService.getUserData(userData['doctorId'] as String);
-        List<Rating> ratingsLocal = await ratingService.getRatings(userData['doctorId'] as String);
+        List<Rating> ratingsLocal = await ratingService.getRatingsByDoctorId(userData['doctorId'] as String);
 
         if (assignedDoctorData != null) {
           assignedDoctorName = assignedDoctorData['name'] as String;
           assignedDoctorEmail = assignedDoctorData['email'] as String;
+          assignedDoctorPhoneNumber = assignedDoctorData['phoneNumber'] as String;
+          assignedDoctorSpecialization = assignedDoctorData['specialization'] as String;
           ratings = ratingsLocal;
         }
 
@@ -159,6 +164,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             assignedDoctorId: assignedDoctorId,
                             assignedDoctorName: assignedDoctorName,
                             assignedDoctorEmail: assignedDoctorEmail,
+                            assignedDoctorPhoneNumber: assignedDoctorPhoneNumber,
+                            assignedDoctorSpecialization: assignedDoctorSpecialization,
                             authService: authService,
                             userService: userService,);
                         }

@@ -50,7 +50,7 @@ class _EntireMedicalHistoryScreenState
     if (uid != null) {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
       List<Consultation> consultationsLocal =
-          await consultationService.getConsultations(widget.patient.uid);
+          await consultationService.getConsultationsByPatientId(widget.patient.uid);
       if (userData != null) {
         setState(() {
           userId = uid;

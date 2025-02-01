@@ -5,6 +5,7 @@ import 'package:hand_controller_app/AuthFeature/services/SharedPrefService.dart'
 import 'package:hand_controller_app/AuthFeature/services/UserService.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:pdf/widgets.dart';
 
 import '../models/Doctor.dart';
 import '../models/Patient.dart';
@@ -23,15 +24,22 @@ class AuthService {
     if (result.status == LoginStatus.success) {
       final AccessToken accessToken = result.accessToken!;
       final OAuthCredential credential =
-      FacebookAuthProvider.credential(accessToken.token);
+          FacebookAuthProvider.credential(accessToken.token);
       final UserCredential userCredential =
-      await _auth.signInWithCredential(credential);
+          await _auth.signInWithCredential(credential);
       return userCredential.user;
     }
     return null;
   }
 
-  Future<String?> register(String email, String password, String name, String role) async {
+  Future<String?> register(
+      String email,
+      String password,
+      String name,
+      String role,
+      String dateOfBirth,
+      String phoneNumber,
+      String gender) async {
     try {
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -46,7 +54,7 @@ class AuthService {
 
       Map<String, dynamic> userMap;
 
-      if (role == 'Doctor') {
+      if (role == 'Doctor' || role == 'Therapist') {
         userMap = Doctor(
           uid: userCredential.user!.uid,
           createdAt: Timestamp.now().toDate().toString(),
@@ -54,6 +62,9 @@ class AuthService {
           email: email,
           password: encryptedPassword,
           role: role,
+          dateOfBirth: dateOfBirth,
+          phoneNumber: phoneNumber,
+          gender: gender,
         ).toMap();
       } else {
         userMap = Patient(
@@ -63,12 +74,18 @@ class AuthService {
           email: email,
           password: encryptedPassword,
           role: role,
+          dateOfBirth: dateOfBirth,
+          phoneNumber: phoneNumber,
+          gender: gender,
         ).toMap();
       }
 
-      await _firestore.collection('users').doc(userCredential.user!.uid).set(userMap);
+      await _firestore
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set(userMap);
 
-      return 'User registered: ${userCredential.user!.email}';
+      return userCredential.user!.uid;
     } catch (e) {
       return 'Error: ${e.toString()}';
     }
@@ -81,18 +98,21 @@ class AuthService {
         return null;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
       User? user = userCredential.user;
 
       await userService.storeUserUid(userCredential.user!.uid);
 
-      DocumentSnapshot userDoc = await _firestore.collection('users').doc(user!.uid).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(user!.uid).get();
       if (!userDoc.exists) {
         await _firestore.collection('users').doc(user.uid).set({
           'uid': userCredential.user!.uid,
@@ -107,6 +127,9 @@ class AuthService {
           'timeSpentInWorkouts': 0,
           'accuracyOfExercises': 0.0,
           'doctorId': '',
+          'dateOfBirth': '',
+          'phoneNumber': '',
+          'gender': '',
         });
       }
 
@@ -116,7 +139,6 @@ class AuthService {
       return null;
     }
   }
-
 
   Future<String?> signIn(String email, String password) async {
     try {
@@ -150,9 +172,12 @@ class AuthService {
 
     if (user != null) {
       try {
-        DocumentReference userDocRef = _firestore.collection('users').doc(user.uid);
-        CollectionReference completedProgramsRef = userDocRef.collection('completedPrograms');
-        QuerySnapshot completedProgramsSnapshot = await completedProgramsRef.get();
+        DocumentReference userDocRef =
+            _firestore.collection('users').doc(user.uid);
+        CollectionReference completedProgramsRef =
+            userDocRef.collection('completedPrograms');
+        QuerySnapshot completedProgramsSnapshot =
+            await completedProgramsRef.get();
 
         for (DocumentSnapshot doc in completedProgramsSnapshot.docs) {
           await doc.reference.delete();
@@ -170,15 +195,12 @@ class AuthService {
     return 'No user signed in';
   }
 
-
   Future<String?> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email.trim());
       return 'password email sent';
-
     } catch (e) {
       return 'Error: ${e.toString()}';
     }
   }
-
 }

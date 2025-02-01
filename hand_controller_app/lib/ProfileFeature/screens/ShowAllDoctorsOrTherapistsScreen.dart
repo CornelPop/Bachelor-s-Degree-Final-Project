@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hand_controller_app/AuthFeature/models/Doctor.dart';
+import 'package:hand_controller_app/ProfileFeature/screens/ProfileScreen.dart';
+import 'package:hand_controller_app/ProfileFeature/services/RatingService.dart';
 import 'package:hand_controller_app/ProgressTrackingFeature/widgets/DoneProgramContainerWidget.dart';
 import 'package:hand_controller_app/ProgressTrackingFeature/widgets/ProgressTrackingDashboardDrawer.dart';
 import '../../AuthFeature/services/AuthService.dart';
@@ -7,6 +9,7 @@ import '../../AuthFeature/services/UserService.dart';
 import '../../AlertDialogs/ExitDialogWidget.dart';
 import '../../GlobalThemeData.dart';
 import '../../TrainingProgramsFeature/models/TrainingProgram.dart';
+import '../models/Rating.dart';
 
 class ShowAllDoctorsOrTherapistsScreen extends StatefulWidget {
   const ShowAllDoctorsOrTherapistsScreen({Key? key}) : super(key: key);
@@ -20,12 +23,14 @@ class _ShowAllDoctorsOrTherapistsScreenState
     extends State<ShowAllDoctorsOrTherapistsScreen> {
   final UserService userService = UserService();
   final AuthService authService = AuthService();
+  final RatingService ratingService = RatingService();
 
   late Future<void> _fetchDoctorsFuture;
 
   late List<Doctor> doctors;
   List<Doctor> filteredDoctors = [];
   List<bool> _isExpandedList = [];
+  Map<String, List<Rating>> ratingsMap = {};
   TextEditingController searchController = TextEditingController();
 
   bool _isFilterTileExpended = false;
@@ -171,20 +176,28 @@ class _ShowAllDoctorsOrTherapistsScreenState
   Future<void> fetchDoctors() async {
     String? uid = await userService.getUserUid();
     if (uid != null) {
-      List<dynamic>? doctorsLocal = await userService.getUsersByRole('Doctor');
+      List<dynamic>? doctorsLocal = await userService.getUsersByRoles(['Doctor', 'Therapist']);
+
       if (doctorsLocal.isNotEmpty) {
+        List<Doctor> fetchedDoctors = doctorsLocal.cast<Doctor>();
+
+        Map<String, List<Rating>> tempRatingsMap = {};
+        for (var doctor in fetchedDoctors) {
+          List<Rating> ratings = await ratingService.getRatingsByDoctorId(doctor.uid);
+          tempRatingsMap[doctor.uid] = ratings;
+        }
+
         setState(() {
+          ratingsMap = tempRatingsMap;
+          doctors = fetchedDoctors;
+          filteredDoctors = fetchedDoctors;
           userId = uid;
-          doctors = doctorsLocal.cast<Doctor>();
-          filteredDoctors = doctors;
         });
-      } else {
-        print('No user data found.');
       }
-    } else {
-      print('No UID found in SharedPreferences.');
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -512,6 +525,7 @@ class _ShowAllDoctorsOrTherapistsScreenState
                 itemCount: filteredDoctors.length,
                 itemBuilder: (context, index) {
                   final doctor = filteredDoctors[index];
+                  final doctorRatings = ratingsMap[doctor.uid] ?? [];
                   return Container(
                     margin: const EdgeInsets.only(bottom: 15),
                     decoration: BoxDecoration(
@@ -552,23 +566,11 @@ class _ShowAllDoctorsOrTherapistsScreenState
                                 Text(
                                   doctor.specialization,
                                   style: TextStyle(
-                                      color: Colors.white, fontSize: 14),
-                                ),
-                                SizedBox(height: 8),
-                                const Text(
-                                  'Rating:',
-                                  style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
-                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Text(
-                                  doctor.rating.toString(),
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 14),
-                                ),
-                                SizedBox(height: 8),
+                                SizedBox(height: 8,),
                                 const Text(
                                   'Email:',
                                   style: TextStyle(
@@ -580,7 +582,68 @@ class _ShowAllDoctorsOrTherapistsScreenState
                                 Text(
                                   doctor.email,
                                   style: TextStyle(
-                                      color: Colors.white, fontSize: 14),
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                const Text(
+                                  'Phone Number:',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  doctor.phoneNumber,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                const Text(
+                                  'Rating:',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    ...List.generate(5, (index) {
+                                      double averageRating = doctorRatings.isNotEmpty
+                                          ? doctorRatings.map((rating) => rating.starsNumber).reduce((a, b) => a + b) / doctorRatings.length
+                                          : 0.0;
+
+                                      if (index < averageRating.floor()) {
+                                        return Icon(
+                                          Icons.star,
+                                          color: Colors.yellow,
+                                        );
+                                      } else if (index < averageRating &&
+                                          (averageRating - index) >= 0.5) {
+                                        return Icon(
+                                          Icons.star_half,
+                                          color: Colors.yellow,
+                                        );
+                                      } else {
+                                        return Icon(
+                                          Icons.star_border,
+                                          color: Colors.yellow,
+                                        );
+                                      }
+                                    }),
+                                    Text(
+                                      '(${doctorRatings.length})',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 SizedBox(height: 8),
                                 Align(
@@ -607,7 +670,15 @@ class _ShowAllDoctorsOrTherapistsScreenState
                                     ),
                                     child: ElevatedButton(
                                       onPressed: () async {
-                                        userService.updateUserField(userId, 'doctorId', doctor.uid);
+                                        await userService.updateUserField(userId, 'doctorId', doctor.uid);
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ProfileScreen(),
+                                          ),
+                                        );
                                       },
                                       style: ElevatedButton.styleFrom(
                                         primary: Colors.transparent,

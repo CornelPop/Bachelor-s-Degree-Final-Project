@@ -83,30 +83,29 @@ class UserService {
     }
   }
 
-  Future<List<dynamic>> getUsersByRole(String role) async {
+  Future<List<dynamic>> getUsersByRoles(List<String> roles) async {
     try {
       QuerySnapshot querySnapshot = await _firestore
           .collection('users')
-          .where('role', isEqualTo: role)
+          .where('role', whereIn: roles)
           .get();
 
       return querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        if (role == 'Doctor') {
+        if (roles.contains('Doctor') && data['role'] == 'Doctor' || roles.contains('Therapist') && data['role'] == 'Therapist') {
           return Doctor.fromMap(data);
-        } else if (role == 'Patient') {
-          print('ceva');
-
+        } else if (roles.contains('Patient') && data['role'] == 'Patient') {
           return Patient.fromMap(data);
         }
 
         return data;
       }).toList();
     } catch (e) {
-      print('Error fetching users by role: $e');
+      print('Error fetching users by roles: $e');
       return [];
     }
   }
+
 
   Future<List<Patient>> getPatientsByDoctorId(String doctorId) async {
     try {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hand_controller_app/AuthFeature/screens/ShowAllDoctorsOrTherapistsScreen.dart';
+import 'package:hand_controller_app/ProfileFeature/screens/ShowAllDoctorsOrTherapistsScreen.dart';
 import 'package:hand_controller_app/ProfileFeature/models/Rating.dart';
 import 'package:hand_controller_app/ProfileFeature/screens/ProfileScreen.dart';
 import 'package:hand_controller_app/ProfileFeature/services/PdfProfileService.dart';
@@ -12,18 +12,19 @@ import '../../GlobalThemeData.dart';
 import '../models/MedicalHistory.dart';
 
 class ProfilePatientContentWidget extends StatefulWidget {
-  const ProfilePatientContentWidget(
-      {super.key,
-      required this.userId,
-      required this.name,
-      required this.email,
-      required this.consultations,
-      required this.ratings,
-      required this.assignedDoctorId,
-      required this.assignedDoctorName,
-      required this.assignedDoctorEmail,
-      required this.authService,
-      required this.userService});
+  const ProfilePatientContentWidget({super.key,
+    required this.userId,
+    required this.name,
+    required this.email,
+    required this.consultations,
+    required this.ratings,
+    required this.assignedDoctorId,
+    required this.assignedDoctorName,
+    required this.assignedDoctorEmail,
+    required this.assignedDoctorPhoneNumber,
+    required this.assignedDoctorSpecialization,
+    required this.authService,
+    required this.userService});
 
   final String userId;
   final String name;
@@ -33,6 +34,8 @@ class ProfilePatientContentWidget extends StatefulWidget {
   final String assignedDoctorId;
   final String assignedDoctorName;
   final String assignedDoctorEmail;
+  final String assignedDoctorPhoneNumber;
+  final String assignedDoctorSpecialization;
   final AuthService authService;
   final UserService userService;
 
@@ -43,9 +46,9 @@ class ProfilePatientContentWidget extends StatefulWidget {
 
 class _ProfilePatientContentWidgetState
     extends State<ProfilePatientContentWidget> {
-
   final PdfProfileService pdfProfileService = PdfProfileService();
   final RatingService ratingService = RatingService();
+  final UserService userService = UserService();
 
   List<bool> _isExpandedList = [];
   bool _isAssignedDoctorTile = false;
@@ -56,135 +59,141 @@ class _ProfilePatientContentWidgetState
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          contentPadding: EdgeInsets.zero,
-          content: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "Add a Rating",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+      builder: (context) =>
+          StatefulBuilder(
+            builder: (context, setState) =>
+                AlertDialog(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                  content: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(30),
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (index) {
-                      return IconButton(
-                        icon: Icon(
-                          index < _selectedRating
-                              ? Icons.star
-                              : Icons.star_border,
-                          color: Colors.yellow,
-                        ),
-                        iconSize: 25,
-                        onPressed: () {
-                          setState(() {
-                            _selectedRating = index + 1;
-                          });
-                        },
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: Text(
-                          "Cancel",
-                          style: TextStyle(
-                            color: CustomTheme.mainColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: _selectedRating == 0
-                            ? null
-                            : () {
-                          for (int index = 0; index < widget.ratings.length; index++) {
-                            if (widget.ratings[index].ratingSenderId == widget.userId) {
-                              ratingService.deleteRating(
-                                  widget.assignedDoctorId, widget.ratings[index].ratingId);
-                            }
-                          }
-
-                          ratingService.addRating(
-                            widget.assignedDoctorId,
-                            Rating(
-                              ratingId: '',
-                              ratingSenderId: widget.userId,
-                              starsNumber: _selectedRating,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text(
+                            "Add a Rating",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
-                          );
-
-                          Navigator.of(context).pop();
-                          Navigator.of(context).pop();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ProfileScreen()),
-                          );
-                        },
-
-                        style: TextButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            textAlign: TextAlign.center,
                           ),
-                        ),
-                        child: Text(
-                          "Submit",
-                          style: TextStyle(
-                            color: CustomTheme.mainColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                          const SizedBox(height: 15),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(5, (index) {
+                              return IconButton(
+                                icon: Icon(
+                                  index < _selectedRating
+                                      ? Icons.star
+                                      : Icons.star_border,
+                                  color: Colors.yellow,
+                                ),
+                                iconSize: 25,
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedRating = index + 1;
+                                  });
+                                },
+                              );
+                            }),
                           ),
-                        ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 30, vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: Text(
+                                  "Cancel",
+                                  style: TextStyle(
+                                    color: CustomTheme.mainColor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: _selectedRating == 0
+                                    ? null
+                                    : () {
+                                  for (int index = 0;
+                                  index < widget.ratings.length;
+                                  index++) {
+                                    if (widget.ratings[index].ratingSenderId ==
+                                        widget.userId) {
+                                      ratingService.deleteRating(
+                                          widget.ratings[index].ratingId);
+                                    }
+                                  }
+
+                                  ratingService.addRating(
+                                    Rating(
+                                      ratingReceiverId: widget.assignedDoctorId,
+                                      ratingId: '',
+                                      ratingSenderId: widget.userId,
+                                      starsNumber: _selectedRating,
+                                    ),
+                                  );
+
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                        const ProfileScreen()),
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 30, vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: Text(
+                                  "Submit",
+                                  style: TextStyle(
+                                    color: CustomTheme.mainColor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ],
-              ),
-            ),
+                ),
           ),
-        ),
-      ),
     );
   }
 
@@ -198,8 +207,14 @@ class _ProfilePatientContentWidgetState
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height,
-      width: MediaQuery.of(context).size.width,
+      height: MediaQuery
+          .of(context)
+          .size
+          .height,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
@@ -251,7 +266,8 @@ class _ProfilePatientContentWidgetState
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Container(
+              child: widget.assignedDoctorName != '' ?
+              Container(
                 decoration: BoxDecoration(
                   color: CustomTheme.accentColor,
                   borderRadius: BorderRadius.circular(12),
@@ -281,6 +297,22 @@ class _ProfilePatientContentWidgetState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
+                                'Specialization:',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                widget.assignedDoctorSpecialization,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              SizedBox(height: 8,),
+                              const Text(
                                 'Email:',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -290,6 +322,22 @@ class _ProfilePatientContentWidgetState
                               ),
                               Text(
                                 widget.assignedDoctorEmail,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              SizedBox(height: 8),
+                              const Text(
+                                'Phone Number:',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                widget.assignedDoctorPhoneNumber,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -308,12 +356,12 @@ class _ProfilePatientContentWidgetState
                                 children: [
                                   ...List.generate(5, (index) {
                                     double averageRating = widget
-                                            .ratings.isNotEmpty
+                                        .ratings.isNotEmpty
                                         ? widget.ratings
-                                                .map((rating) =>
-                                                    rating.starsNumber)
-                                                .reduce((a, b) => a + b) /
-                                            widget.ratings.length
+                                        .map((rating) =>
+                                    rating.starsNumber)
+                                        .reduce((a, b) => a + b) /
+                                        widget.ratings.length
                                         : 0.0;
 
                                     if (index < averageRating.floor()) {
@@ -344,50 +392,119 @@ class _ProfilePatientContentWidgetState
                                 ],
                               ),
                               SizedBox(height: 10),
-                              Align(
-                                alignment: Alignment.center,
-                                child: Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [
-                                        CustomTheme.accentColor4,
-                                        CustomTheme.accentColor2,
-                                      ],
-                                      begin: Alignment.centerLeft,
-                                      end: Alignment.centerRight,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        blurRadius: 20,
-                                        offset: Offset(0, 0),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 15.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              CustomTheme.accentColor4,
+                                              CustomTheme.accentColor2,
+                                            ],
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(
+                                                  0.2),
+                                              blurRadius: 20,
+                                              offset: Offset(0, 0),
+                                            ),
+                                          ],
+                                          borderRadius: BorderRadius.circular(
+                                              30),
+                                        ),
+                                        child: ElevatedButton(
+                                          onPressed: () async {
+                                            await userService.updateUserField(
+                                                widget.userId, 'doctorId', '');
+                                            Navigator.pop(context);
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ProfileScreen()),
+                                            );
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            primary: Colors.transparent,
+                                            shadowColor: Colors.transparent,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius
+                                                  .circular(30),
+                                            ),
+                                            elevation: 0, // Remove elevation
+                                          ),
+                                          child: const Text(
+                                            "Unassign",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors
+                                                  .white, // Set text color to white
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ],
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  child: ElevatedButton(
-                                    onPressed: () async {
-                                      _showAddRatingDialog();
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      primary: Colors.transparent,
-                                      shadowColor: Colors.transparent,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                      elevation: 0, // Remove elevation
                                     ),
-                                    child: const Text(
-                                      "Add a rating",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors
-                                            .white, // Set text color to white
+                                    SizedBox(width: 20,),
+                                    Expanded(
+                                      child: Container(
+                                        height: 50,
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [
+                                              CustomTheme.accentColor4,
+                                              CustomTheme.accentColor2,
+                                            ],
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(
+                                                  0.2),
+                                              blurRadius: 20,
+                                              offset: Offset(0, 0),
+                                            ),
+                                          ],
+                                          borderRadius: BorderRadius.circular(
+                                              30),
+                                        ),
+                                        child: ElevatedButton(
+                                          onPressed: () async {
+                                            _showAddRatingDialog();
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            primary: Colors.transparent,
+                                            shadowColor: Colors.transparent,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius
+                                                  .circular(30),
+                                            ),
+                                            elevation: 0, // Remove elevation
+                                          ),
+                                          child: const Text(
+                                            "Add a rating",
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors
+                                                  .white, // Set text color to white
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
+                                    )
+                                  ],
                                 ),
                               ),
                               const SizedBox(
@@ -399,6 +516,24 @@ class _ProfilePatientContentWidgetState
                       ),
                     ),
                   ],
+                ),
+              )
+                  : Container(
+                decoration: BoxDecoration(
+                  color: CustomTheme.accentColor,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ExpansionTile(
+                  backgroundColor: Colors.transparent,
+                  onExpansionChanged: (bool expanded) {
+                    setState(() {
+                      _isAssignedDoctorTile = expanded;
+                    });
+                  },
+                  title: Text(
+                    'No doctor assigned yet',
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),
@@ -435,7 +570,12 @@ class _ProfilePatientContentWidgetState
                       MaterialPageRoute(
                           builder: (context) =>
                               ShowAllDoctorsOrTherapistsScreen()),
-                    );
+                    ).then((result) {
+                      print("Returned result: $result"); // Debugging output
+                      if (result == true) {
+                        setState(() {});
+                      }
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     shadowColor: Colors.transparent,
@@ -445,7 +585,15 @@ class _ProfilePatientContentWidgetState
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
+                  child: widget.assignedDoctorName != '' ? const Text(
+                    'Change Doctor / Therapist',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  )
+                      : const Text(
                     'Choose Doctor / Therapist',
                     style: TextStyle(
                       fontSize: 16,
@@ -473,7 +621,8 @@ class _ProfilePatientContentWidgetState
             const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
-              child: ListView.builder(
+              child: widget.consultations.length != 0
+                  ? ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: widget.consultations.length,
@@ -503,10 +652,11 @@ class _ProfilePatientContentWidgetState
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 15.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 15.0),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
                               children: [
                                 const Text(
                                   'Date:',
@@ -565,25 +715,28 @@ class _ProfilePatientContentWidgetState
                                       ),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.2),
+                                          color: Colors.black
+                                              .withOpacity(0.2),
                                           blurRadius: 20,
                                           offset: Offset(0, 0),
                                         ),
                                       ],
-                                      borderRadius: BorderRadius.circular(30),
+                                      borderRadius:
+                                      BorderRadius.circular(30),
                                     ),
                                     child: ElevatedButton(
                                       onPressed: () async {
                                         pdfProfileService
                                             .generateAndSavePDFSpecificConsultation(
-                                                widget.name, medicalHistory);
+                                            widget.name,
+                                            medicalHistory);
                                       },
                                       style: ElevatedButton.styleFrom(
                                         primary: Colors.transparent,
                                         shadowColor: Colors.transparent,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(30),
+                                          BorderRadius.circular(30),
                                         ),
                                         elevation: 0, // Remove elevation
                                       ),
@@ -608,6 +761,16 @@ class _ProfilePatientContentWidgetState
                     ),
                   );
                 },
+              )
+                  : Center(
+                child: Text(
+                  'No consultations available.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             SizedBox(

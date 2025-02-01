@@ -13,6 +13,7 @@ import '../../GlobalThemeData.dart';
 import '../../TrainingProgramsFeature/models/TrainingProgram.dart';
 import '../../TrainingProgramsFeature/widgets/ProgramContainerWidget.dart';
 import '../widgets/TrainingDurationStackedBarChart.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'ShowAllProgramsScreen.dart';
 
 class ProgressTrackingScreen extends StatefulWidget {
@@ -26,6 +27,8 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
   final UserService userService = UserService();
   final AuthService authService = AuthService();
   final PdfService pdfService = PdfService();
+
+  final PageController _pageController = PageController(viewportFraction: 1);
 
   String name = '';
   String email = '';
@@ -46,7 +49,8 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
     String? uid = await userService.getUserUid();
     if (uid != null) {
       Map<String, dynamic>? userData = await userService.getUserData(uid);
-      List<TrainingProgram> programs = await userService.getCompletedPrograms(uid);
+      List<TrainingProgram> programs =
+          await userService.getCompletedPrograms(uid);
       if (userData != null) {
         setState(() async {
           name = userData['name'] as String;
@@ -102,8 +106,7 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
                       end: Alignment.centerRight,
                     ),
                   ),
-                  child: const Center(
-                      child: CircularProgressIndicator()));
+                  child: const Center(child: CircularProgressIndicator()));
             } else {
               return _buildDrawer();
             }
@@ -143,7 +146,10 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
                             width: MediaQuery.of(context).size.width,
                             decoration: const BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [CustomTheme.mainColor2, CustomTheme.mainColor],
+                                colors: [
+                                  CustomTheme.mainColor2,
+                                  CustomTheme.mainColor
+                                ],
                                 begin: Alignment.centerLeft,
                                 end: Alignment.centerRight,
                               ),
@@ -203,16 +209,31 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
             ),
             Padding(
               padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                height: 300,
-                child: PageView.builder(
-                  physics: BouncingScrollPhysics(),
-                  controller: PageController(viewportFraction: 1),
-                  itemCount: 3,
-                  itemBuilder: (context, index) {
-                    return _buildChartCarouselItem(index);
-                  },
-                ),
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: 300,
+                    child: PageView.builder(
+                      physics: BouncingScrollPhysics(),
+                      controller: _pageController,
+                      itemCount: 3,
+                      itemBuilder: (context, index) {
+                        return _buildChartCarouselItem(index);
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  SmoothPageIndicator(
+                    controller: _pageController,
+                    count: 3,
+                    effect: ExpandingDotsEffect(
+                      dotHeight: 8,
+                      dotWidth: 8,
+                      activeDotColor: Colors.white,
+                      dotColor: Colors.white.withOpacity(0.4), // Inactive dots
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(
@@ -256,7 +277,8 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
                       SizedBox(width: 8),
                       Text(
                         'Download Reports',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -278,82 +300,103 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: completedPrograms.length > 5 ? 5 : completedPrograms.length,
-                    itemBuilder: (context, index) {
-                      final program = completedPrograms[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: DoneProgramContainer(
-                          program: program,
-                          title: program.name,
-                          date: 'Done in ${program.date.day} / ${program.date.month} / ${program.date.year}',
-                          subtitle: '${program.duration} MINS  ●  ${program.exercises.length} EXERCISES',
-                          difficulty: program.category,
-                        ),
-                      );
-                    },
-                  ),
-                  if (completedPrograms.length > 5)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Container(
-                        height: 50,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              CustomTheme.accentColor4,
-                              CustomTheme.accentColor2,
-                            ],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 20,
-                              offset: Offset(0, 0),
-                            ),
-                          ],
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ShowAllProgramsScreen(completedPrograms: completedPrograms),
+              child: completedPrograms.length != 0
+                  ? Column(
+                      children: [
+                        ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: completedPrograms.length > 5
+                              ? 5
+                              : completedPrograms.length,
+                          itemBuilder: (context, index) {
+                            final program = completedPrograms[index];
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: DoneProgramContainer(
+                                program: program,
+                                title: program.name,
+                                date:
+                                    'Done in ${program.date.day} / ${program.date.month} / ${program.date.year}',
+                                subtitle:
+                                    '${program.duration} MINS  ●  ${program.exercises.length} EXERCISES',
+                                difficulty: program.category,
                               ),
                             );
                           },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.list, color: Colors.white),
-                              SizedBox(width: 8),
-                              Text(
-                                'Show All Training Programs',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        if (completedPrograms.length > 5)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            child: Container(
+                              height: 50,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    CustomTheme.accentColor4,
+                                    CustomTheme.accentColor2,
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 20,
+                                    offset: Offset(0, 0),
+                                  ),
+                                ],
+                                borderRadius: BorderRadius.circular(30),
                               ),
-                            ],
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors.transparent,
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ShowAllProgramsScreen(
+                                              completedPrograms:
+                                                  completedPrograms),
+                                    ),
+                                  );
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.list, color: Colors.white),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Show All Training Programs',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
+                      ],
+                    )
+                  : Center(
+                      child: Text(
+                        '0 training programs completed',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                ],
-              ),
             ),
           ],
         ),
@@ -364,11 +407,14 @@ class _ProgressTrackingScreenState extends State<ProgressTrackingScreen> {
   Widget _buildChartCarouselItem(int index) {
     switch (index) {
       case 0:
-        return LastMonthTotalNumberByCategoryPieChart(completedPrograms: completedPrograms);
+        return LastMonthTotalNumberByCategoryPieChart(
+            completedPrograms: completedPrograms);
       case 1:
-        return LastWeekTotalNumberLineChart(completedPrograms: completedPrograms);
+        return LastWeekTotalNumberLineChart(
+            completedPrograms: completedPrograms);
       case 2:
-        return TrainingDurationStackedBarChart(completedPrograms: completedPrograms);
+        return TrainingDurationStackedBarChart(
+            completedPrograms: completedPrograms);
       default:
         return Container();
     }
